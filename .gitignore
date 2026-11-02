@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+credentials/*.json
+!credentials/.gitkeep
+
+# Generated Outputs
+output/resumes/*.pdf
+!output/resumes/.gitkeep
+
+# Frontend
+.pnpm-store/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+
+# Local runtime data
+data/state_store.json
+
+# OS
+.DS_Store
+
