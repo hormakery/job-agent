@@ -35,7 +35,7 @@ class Settings(BaseSettings):
         "http_local", "cli_subprocess", "python_import", "local_heuristic"
     ] = "http_local"
     ats_local_repo_path: str = str(PROJECT_ROOT.parent / "ATS-Checker")
-    ats_local_http_url: str = "http://127.0.0.1:5000/api/scans/analyze"
+    ats_local_http_url: str = "http://127.0.0.1:4000/api/v1/scans/analyze"
     ats_cli_command: str = ""
     ats_match_threshold: int = 50
 

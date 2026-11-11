@@ -1,14 +1,18 @@
 import importlib.util
 import json
+import logging
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Optional
 import httpx
 
 from job_agent.config import settings
 from job_agent.models.schemas import MatchEvaluation
+
+logger = logging.getLogger(__name__)
 
 # Canonical tech & domain skill vocabulary for local deterministic ATS evaluation
 SKILL_TAXONOMY = [
@@ -24,26 +28,67 @@ SKILL_TAXONOMY = [
 
 class ATSCheckerAdapter:
     """
-    Adapter bridging Agent 2 and the Frontend Studio to the user's existing local ATS checker.
-    Supports:
-      1. `http_local`: Calls the user's local ATS HTTP endpoint (e.g., http://127.0.0.1:8001/evaluate)
-      2. `python_import`: Imports a function directly from `ATS_LOCAL_REPO_PATH`
-      3. `cli_subprocess`: Invokes the local ATS CLI command and parses JSON stdout
-      4. `local_heuristic`: Built-in local ATS keyword/role/domain scorer matching PRD weights
-         (50% hard skills, 30% role alignment, 20% domain knowledge) when external local service is offline.
+    Adapter bridging Agent 2 and Frontend Studio to the user's real ATS-Checker service
+    located at `/Users/beebee/Desktop/personal project/ATS-Checker`.
+
+    Integration modes:
+      1. `http_local`: Calls the user's local Express ATS-Checker backend (default: http://127.0.0.1:4000/api/v1/scans/analyze)
+      2. `python_import`: Imports directly from ATS_LOCAL_REPO_PATH
+      3. `cli_subprocess`: Invokes a local CLI command and parses JSON stdout
+      4. `local_heuristic`: Built-in local ATS engine matching the PRD formula
+         (50% hard skills, 30% role alignment, 20% domain keywords) when the Express server is offline.
     """
 
     def __init__(self, threshold: Optional[int] = None) -> None:
         self.threshold = threshold if threshold is not None else settings.ats_match_threshold
 
-    def evaluate(self, master_resume: str, job_description: str) -> MatchEvaluation:
+    def check_health(self) -> dict:
+        """Pings the user's local ATS-Checker backend server to report live connectivity & latency."""
+        url = settings.ats_local_http_url
+        base_url = url.split("/api/")[0] if "/api/" in url else url.rstrip("/")
+        repo_exists = Path(settings.ats_local_repo_path).exists()
+
+        for health_path in ["/health", "/api/v1/health", "/"]:
+            health_url = f"{base_url}{health_path}"
+            try:
+                start = time.time()
+                with httpx.Client(timeout=2.0) as client:
+                    resp = client.get(health_url)
+                    elapsed_ms = int((time.time() - start) * 1000)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        return {
+                            "connected": True,
+                            "service": data.get("service", data.get("name", "ats-checker-backend")),
+                            "latency_ms": elapsed_ms,
+                            "endpoint": url,
+                            "mode": "http_live",
+                            "repo_path": settings.ats_local_repo_path,
+                            "environment": data.get("environment", "development"),
+                        }
+            except Exception:
+                continue
+
+        return {
+            "connected": False,
+            "service": "ats_heuristic_engine",
+            "latency_ms": None,
+            "endpoint": url,
+            "mode": "local_heuristic" if repo_exists else "unconfigured",
+            "repo_path": settings.ats_local_repo_path,
+            "note": "Express backend offline; built-in PRD ATS heuristic engine active.",
+        }
+
+    def evaluate(
+        self, master_resume: str, job_description: str, role_title: str = "Software Engineer", company: str = "Target Company"
+    ) -> MatchEvaluation:
         mode = settings.ats_integration_mode
 
         if mode == "http_local":
             try:
-                return self._evaluate_via_http(master_resume, job_description)
-            except Exception:
-                # Fallback to local ATS scorer so pipeline doesn't crash if server isn't started yet
+                return self._evaluate_via_http(master_resume, job_description, role_title=role_title, company=company)
+            except Exception as e:
+                logger.debug(f"HTTP evaluation failed ({e}), falling back to local heuristic ATS engine.")
                 return self._evaluate_local_ats(
                     master_resume, job_description, source_note="local_ats_engine (http_local fallback)"
                 )
@@ -66,15 +111,25 @@ class ATSCheckerAdapter:
 
         return self._evaluate_local_ats(master_resume, job_description, source_note="local_ats_checker")
 
-    def _evaluate_via_http(self, master_resume: str, job_description: str) -> MatchEvaluation:
+    def _evaluate_via_http(
+        self, master_resume: str, job_description: str, role_title: str = "Software Engineer", company: str = "Target Company"
+    ) -> MatchEvaluation:
+        # Schema tailored to ATS-Checker backend scanRoutes (`analyzeScan`)
+        payload = {
+            "resumeText": master_resume,
+            "jobDescriptionText": job_description,
+            "jobTitle": role_title,
+            "company": company,
+            # Backwards-compatibility aliases
+            "resume": master_resume,
+            "job_description": job_description,
+        }
+
         with httpx.Client(timeout=15.0) as client:
-            resp = client.post(
-                settings.ats_local_http_url,
-                json={"resume": master_resume, "job_description": job_description},
-            )
+            resp = client.post(settings.ats_local_http_url, json=payload)
             resp.raise_for_status()
             data = resp.json()
-        return self._normalize_payload(data, source="local_ats_http")
+        return self._normalize_payload(data, source="ats_checker_backend_http")
 
     def _evaluate_via_python_import(self, master_resume: str, job_description: str) -> MatchEvaluation:
         repo_path = Path(settings.ats_local_repo_path).expanduser().resolve()
@@ -84,7 +139,6 @@ class ATSCheckerAdapter:
         if str(repo_path) not in sys.path:
             sys.path.insert(0, str(repo_path))
 
-        # Look for common entrypoints in the user's local ATS checker repo
         for candidate_file in ["checker.py", "ats_checker.py", "scorer.py", "main.py", "app.py"]:
             mod_file = repo_path / candidate_file
             if mod_file.exists():
@@ -113,15 +167,27 @@ class ATSCheckerAdapter:
         return self._normalize_payload(data, source="local_ats_cli")
 
     def _normalize_payload(self, data: dict, source: str) -> MatchEvaluation:
-        score = int(round(float(data.get("match_score", data.get("score", 0)))))
+        raw_score = data.get("atsScore", data.get("overallScore", data.get("match_score", data.get("score", 0))))
+        score = int(round(float(raw_score)))
         score = max(0, min(100, score))
-        missing = data.get("missing_critical_skills", data.get("missing_skills", data.get("missing_keywords", [])))
-        matched = data.get("matched_skills", data.get("matched_keywords", []))
+
+        missing = data.get("missingKeywords", data.get("missing_critical_skills", data.get("missing_skills", [])))
+        matched = data.get("matchedKeywords", data.get("matched_skills", []))
         passed = score >= self.threshold
+
+        suggestions = data.get("suggestions", data.get("recommendations", []))
+        suggestion_summary = ""
+        if isinstance(suggestions, list) and suggestions:
+            top = suggestions[0]
+            if isinstance(top, dict):
+                suggestion_summary = f" Suggestion: {top.get('issue', top.get('suggestedText', ''))}"
+
         reasoning = data.get("reasoning") or (
             f"ATS Score {score}% ({'Passed' if passed else 'Below'} {self.threshold}% gate). "
             + (f"Missing skills: {', '.join(missing[:5])}." if missing else "Strong alignment across core requirements.")
+            + suggestion_summary
         )
+
         return MatchEvaluation(
             match_score=score,
             missing_critical_skills=list(missing),
@@ -138,7 +204,7 @@ class ATSCheckerAdapter:
         Built-in local ATS scoring engine implementing the PRD formula:
         - Hard skills alignment (50% weight)
         - Role title & seniority alignment (30% weight)
-        - Domain & impact keyword alignment (20% weight)
+        - Domain & engineering practices keyword alignment (20% weight)
         """
         resume_lower = master_resume.lower()
         jd_lower = job_description.lower()
@@ -202,4 +268,3 @@ class ATSCheckerAdapter:
             reasoning=reasoning,
             ats_source=source_note,
         )
-
