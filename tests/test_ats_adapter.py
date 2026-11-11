@@ -57,3 +57,36 @@ def test_local_ats_evaluate_pass_and_fail():
     assert fail_res.match_score < 50
     assert fail_res.passed_threshold is False
 
+
+def test_normalize_express_ats_checker_response():
+    adapter = ATSCheckerAdapter(threshold=50)
+    express_data = {
+        "atsScore": 88,
+        "matchedKeywords": ["React", "TypeScript", "Next.js", "Docker"],
+        "missingKeywords": ["Kubernetes"],
+        "suggestions": [
+            {"issue": "Quantify deployment velocity metrics in experience bullet."}
+        ],
+    }
+    evaluation = adapter._normalize_payload(express_data, source="ats_checker_backend_http")
+    assert evaluation.match_score == 88
+    assert evaluation.passed_threshold is True
+    assert "React" in evaluation.matched_skills
+    assert "Kubernetes" in evaluation.missing_critical_skills
+    assert "Suggestion:" in evaluation.reasoning
+
+
+def test_ats_health_check_reporting():
+    from fastapi.testclient import TestClient
+    from job_agent.api.server import app
+
+    client = TestClient(app)
+    res = client.get("/api/ats/health")
+    assert res.status_code == 200
+    data = res.json()
+    assert "connected" in data
+    assert "service" in data
+    assert "mode" in data
+    assert "repo_path" in data
+
+

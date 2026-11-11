@@ -91,18 +91,20 @@ def get_health() -> dict:
     gmail = GmailClient()
     cal = GoogleCalendarClient()
     jsearch = JSearchProvider()
+    ats = ATSCheckerAdapter()
+    ats_health = ats.check_health()
     has_gemini = bool(settings.gemini_api_key and settings.gemini_api_key != "your_gemini_api_key_here")
-
-    ats_repo_exists = Path(settings.ats_local_repo_path).exists()
 
     return {
         "status": "ok",
         "ats_threshold": settings.ats_match_threshold,
         "integrations": {
             "local_ats_checker": {
-                "connected": ats_repo_exists,
-                "mode": settings.ats_integration_mode,
-                "endpoint_or_path": settings.ats_local_repo_path,
+                "connected": ats_health["connected"] or Path(settings.ats_local_repo_path).exists(),
+                "mode": ats_health["mode"],
+                "service": ats_health["service"],
+                "endpoint_or_path": ats_health["endpoint"],
+                "latency_ms": ats_health["latency_ms"],
             },
             "gemini_llm": {
                 "connected": has_gemini,
@@ -282,6 +284,12 @@ async def stream_workflow_events() -> StreamingResponse:
         yield f"data: {json.dumps({'event': 'completed', 'count': len(state.get('processed_rows', []))})}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@app.get("/api/ats/health")
+def get_ats_health() -> dict:
+    ats = ATSCheckerAdapter()
+    return ats.check_health()
 
 
 @app.post("/api/ats/evaluate")
