@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from job_agent.config import settings
+from job_agent.integrations.google_auth import get_google_credentials
 from job_agent.models.schemas import CalendarSlot
 
 
@@ -10,7 +11,7 @@ class GoogleCalendarClient:
     """
 
     def is_configured(self) -> bool:
-        return Path(settings.google_oauth_token_file).exists()
+        return get_google_credentials() is not None
 
     def find_open_slots(self) -> list[CalendarSlot]:
         base = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) + timedelta(days=2)

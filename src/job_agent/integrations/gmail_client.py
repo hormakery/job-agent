@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 from job_agent.config import settings
+from job_agent.integrations.google_auth import get_google_credentials
 
 
 class GmailClient:
@@ -10,7 +11,7 @@ class GmailClient:
     """
 
     def is_configured(self) -> bool:
-        return Path(settings.google_oauth_token_file).exists()
+        return get_google_credentials() is not None
 
     def fetch_recent_company_threads(self, company_names: list[str]) -> list[dict]:
         """

@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from job_agent.config import settings
+from job_agent.integrations.google_auth import get_google_credentials
 from job_agent.models.schemas import (
     ApplicationDispatchItem,
     ApplicationStatus,
@@ -67,9 +68,8 @@ class GoogleSheetsClient:
         self.state_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     def is_google_sheets_connected(self) -> bool:
-        sa_path = Path(settings.google_service_account_file)
-        token_path = Path(settings.google_oauth_token_file)
-        return bool(settings.google_sheet_id and (sa_path.exists() or token_path.exists()))
+        creds = get_google_credentials()
+        return bool(settings.google_sheet_id and creds is not None)
 
     def _sync_row_to_gspread(self, row: JobSheetRow) -> None:
         """If Google Sheets credentials + Sheet ID are configured, sync row to live Google Sheet."""
@@ -78,18 +78,11 @@ class GoogleSheetsClient:
         try:
             import gspread
 
-            sa_path = Path(settings.google_service_account_file)
-            token_path = Path(settings.google_oauth_token_file)
-
-            if sa_path.exists():
-                gc = gspread.service_account(filename=str(sa_path))
-            elif token_path.exists():
-                from google.oauth2.credentials import Credentials
-                creds = Credentials.from_authorized_user_file(str(token_path))
-                gc = gspread.authorize(creds)
-            else:
+            creds = get_google_credentials()
+            if not creds:
                 return
 
+            gc = gspread.authorize(creds)
             sh = gc.open_by_key(settings.google_sheet_id)
             try:
                 ws = sh.worksheet(settings.google_sheet_worksheet_name)
@@ -123,6 +116,15 @@ class GoogleSheetsClient:
         except Exception:
             # Local store remains safe and authoritative
             pass
+
+    def sync_all_jobs_to_gspread(self) -> int:
+        """Syncs all jobs from local state store to the live Google Sheet."""
+        if not self.is_google_sheets_connected():
+            return 0
+        jobs = self.get_all_jobs()
+        for j in jobs:
+            self._sync_row_to_gspread(j)
+        return len(jobs)
 
     def get_existing_job_ids(self) -> set[str]:
         store = self._read_store()

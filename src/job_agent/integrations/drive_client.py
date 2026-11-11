@@ -1,5 +1,11 @@
+import logging
 from pathlib import Path
+from typing import Optional
+
 from job_agent.config import settings
+from job_agent.integrations.google_auth import get_google_credentials
+
+logger = logging.getLogger(__name__)
 
 
 class GoogleDriveClient:
@@ -9,36 +15,36 @@ class GoogleDriveClient:
     """
 
     def is_configured(self) -> bool:
-        sa_path = Path(settings.google_service_account_file)
-        return bool(settings.google_drive_resume_folder_id and sa_path.exists())
+        creds = get_google_credentials()
+        return creds is not None
 
     def upload_resume_pdf(self, local_pdf_path: Path, job_id: str) -> str:
+        fallback_url = f"http://localhost:{settings.backend_port}/api/resumes/{job_id}/pdf"
         if not self.is_configured():
-            return f"http://localhost:{settings.backend_port}/api/resumes/{job_id}/pdf"
+            return fallback_url
 
         try:
-            from google.oauth2 import service_account
             from googleapiclient.discovery import build
             from googleapiclient.http import MediaFileUpload
 
-            scopes = ["https://www.googleapis.com/auth/drive.file"]
-            creds = service_account.Credentials.from_service_account_file(
-                settings.google_service_account_file, scopes=scopes
-            )
+            creds = get_google_credentials()
+            if not creds:
+                return fallback_url
+
             service = build("drive", "v3", credentials=creds)
             file_metadata = {
                 "name": local_pdf_path.name,
-                "parents": [settings.google_drive_resume_folder_id],
             }
-            media = MediaFileUpload(str(local_pdf_path), mimetype="application/pdf")
+            if settings.google_drive_resume_folder_id:
+                file_metadata["parents"] = [settings.google_drive_resume_folder_id]
+
+            media = MediaFileUpload(str(local_pdf_path), mimetype="application/pdf", resumable=True)
             uploaded = (
                 service.files()
-                .create(body=file_metadata, media_body=media, fields="id, webViewLink")
+                .create(body=file_metadata, media_body=media, fields="id, webViewLink, webContentLink")
                 .execute()
             )
-            return uploaded.get(
-                "webViewLink", f"http://localhost:{settings.backend_port}/api/resumes/{job_id}/pdf"
-            )
-        except Exception:
-            return f"http://localhost:{settings.backend_port}/api/resumes/{job_id}/pdf"
-
+            return uploaded.get("webViewLink", fallback_url)
+        except Exception as e:
+            logger.warning(f"Google Drive upload failed for {local_pdf_path.name}: {e}")
+            return fallback_url
