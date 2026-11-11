@@ -14,6 +14,12 @@ from job_agent.integrations.ats_adapter import ATSCheckerAdapter
 from job_agent.integrations.calendar_client import GoogleCalendarClient
 from job_agent.integrations.drive_client import GoogleDriveClient
 from job_agent.integrations.gmail_client import GmailClient
+from job_agent.integrations.google_auth import (
+    disconnect_google_account,
+    exchange_code_for_token,
+    generate_authorization_url,
+    get_google_auth_status,
+)
 from job_agent.integrations.jsearch_client import JSearchProvider
 from job_agent.integrations.pdf_renderer import render_markdown_to_pdf
 from job_agent.integrations.sheets_client import GoogleSheetsClient
@@ -68,6 +74,16 @@ class InterviewConfirmRequest(BaseModel):
     custom_draft_reply: Optional[str] = None
 
 
+class GoogleCallbackRequest(BaseModel):
+    code: str
+    redirect_uri: Optional[str] = None
+
+
+class GoogleClientSecretRequest(BaseModel):
+    client_id: str
+    client_secret: str
+
+
 @app.get("/api/health")
 def get_health() -> dict:
     sheets = GoogleSheetsClient()
@@ -108,6 +124,63 @@ def get_health() -> dict:
             "google_calendar": {"connected": cal.is_configured()},
         },
     }
+
+
+# Google Workspace OAuth2 Endpoints
+@app.get("/api/auth/google/url")
+def get_google_auth_url(redirect_uri: Optional[str] = None) -> dict:
+    redir = redirect_uri or f"{settings.frontend_url}/settings"
+    try:
+        url, state = generate_authorization_url(redirect_uri=redir)
+        return {"url": url, "state": state, "redirect_uri": redir}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/auth/google/callback")
+def handle_google_callback(payload: GoogleCallbackRequest) -> dict:
+    redir = payload.redirect_uri or f"{settings.frontend_url}/settings"
+    try:
+        result = exchange_code_for_token(code=payload.code, redirect_uri=redir)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"OAuth exchange failed: {e}")
+
+
+@app.get("/api/auth/google/status")
+def get_google_status() -> dict:
+    return get_google_auth_status()
+
+
+@app.post("/api/auth/google/disconnect")
+def handle_google_disconnect() -> dict:
+    return disconnect_google_account()
+
+
+@app.post("/api/auth/google/client-secret")
+def update_google_client_secret(payload: GoogleClientSecretRequest) -> dict:
+    cs_path = Path(settings.google_oauth_credentials_file)
+    cs_path.parent.mkdir(parents=True, exist_ok=True)
+    client_data = {
+        "web": {
+            "client_id": payload.client_id,
+            "client_secret": payload.client_secret,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": [f"{settings.frontend_url}/settings"],
+        }
+    }
+    cs_path.write_text(json.dumps(client_data, indent=2), encoding="utf-8")
+    return {"saved": True, "path": str(cs_path)}
+
+
+@app.post("/api/google/sheets/sync-all")
+def trigger_google_sheets_sync_all() -> dict:
+    sheets = GoogleSheetsClient()
+    if not sheets.is_google_sheets_connected():
+        raise HTTPException(status_code=400, detail="Google Sheets not connected or GOOGLE_SHEET_ID not set.")
+    count = sheets.sync_all_jobs_to_gspread()
+    return {"synced_count": count, "sheet_id": settings.google_sheet_id}
 
 
 # Candidate Profile Endpoints
