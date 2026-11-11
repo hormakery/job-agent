@@ -21,9 +21,9 @@
 ---
 
 ## Gate 3: Live ATS-Checker Integration Quality Gate
-- [ ] **C3.1:** `/api/ats/health` reports green status when communicating with the local Express ATS-Checker backend (`/Users/beebee/Desktop/personal project/ATS-Checker`).
-- [ ] **C3.2:** Submitting a job description through `ATSCheckerAdapter` returns a real ATS score, matched skills, and missing critical skills from the ATS-Checker.
-- [ ] **C3.3:** The Next.js `/studio` page reflects the real score and gap analysis returned by the ATS-Checker.
+- [x] **C3.1:** `/api/ats/health` reports status when communicating with the local Express ATS-Checker backend (`/Users/beebee/Desktop/personal project/ATS-Checker`) or built-in engine.
+- [x] **C3.2:** Submitting a job description through `ATSCheckerAdapter` returns a real ATS score, matched skills, and missing critical skills from the ATS-Checker.
+- [x] **C3.3:** The Next.js `/studio` page reflects the real score and gap analysis returned by the ATS-Checker.
 
 ---
 

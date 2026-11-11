@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   API_BASE,
   evaluateAtsMatch,
+  fetchAtsHealth,
   fetchJobs,
   fetchMasterResume,
   tailorJobResume,
@@ -16,6 +17,9 @@ import {
   CheckCircle2,
   XCircle,
   ExternalLink,
+  Server,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 
 export default function AtsAndTailorStudioPage() {
@@ -26,10 +30,12 @@ export default function AtsAndTailorStudioPage() {
     "We are looking for a Senior Full-Stack & Mobile Engineer experienced in Python, FastAPI, TypeScript, React, Next.js, React Native, Docker, Kubernetes, and AWS."
   );
   const [evaluation, setEvaluation] = useState<MatchEvaluation | null>(null);
+  const [atsHealth, setAtsHealth] = useState<any>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [tailoring, setTailoring] = useState(false);
 
   useEffect(() => {
+    fetchAtsHealth().then(setAtsHealth).catch(console.error);
     Promise.all([fetchMasterResume(), fetchJobs()]).then(([mr, jb]) => {
       setMasterResume(mr.content);
       setJobs(jb);
@@ -67,7 +73,7 @@ export default function AtsAndTailorStudioPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
       <div className="border-b border-slate-800 pb-5">
         <h1 className="text-2xl font-bold text-white">
           Local ATS Checker Sandbox &amp; Resume Tailor Studio
@@ -75,6 +81,28 @@ export default function AtsAndTailorStudioPage() {
         <p className="text-sm text-slate-400 mt-1">
           Test any job description against your Existing Local ATS Checker (&ge;50% gatekeeper) and preview side-by-side tailored resumes &amp; PDFs
         </p>
+      </div>
+
+      {/* ATS Integration Health Banner */}
+      <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5">
+          <Server className="w-4 h-4 text-indigo-400" />
+          <span className="text-slate-300 font-semibold">ATS Integration Engine:</span>
+          {atsHealth?.connected ? (
+            <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 font-medium flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Live Express ATS-Checker Connected ({atsHealth.service} • {atsHealth.latency_ms}ms latency)</span>
+            </span>
+          ) : (
+            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-medium flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Built-in ATS Scorer Active (50% Hard Skills, 30% Role, 20% Domain)</span>
+            </span>
+          )}
+        </div>
+        <span className="text-slate-400 font-mono text-[11px] truncate">
+          Target: {atsHealth?.endpoint || "http://127.0.0.1:4000/api/v1/scans/analyze"}
+        </span>
       </div>
 
       {/* Top Panel: Local ATS Checker Live Tester */}

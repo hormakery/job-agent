@@ -76,6 +76,21 @@ export async function evaluateAtsMatch(
   return res.json();
 }
 
+export async function fetchAtsHealth(): Promise<{
+  connected: boolean;
+  service: string;
+  latency_ms: number | null;
+  endpoint: string;
+  mode: string;
+  repo_path: string;
+  environment?: string;
+  note?: string;
+}> {
+  const res = await fetch(`${API_BASE}/api/ats/health`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to check ATS health");
+  return res.json();
+}
+
 export async function tailorJobResume(jobId: string): Promise<JobSheetRow> {
   const res = await fetch(`${API_BASE}/api/resumes/${jobId}/tailor`, {
     method: "POST",

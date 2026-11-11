@@ -53,13 +53,13 @@
 ## Phase 3: Live Integration with Your Real `ATS-Checker`
 **Goal:** Connect Agent 2 directly to your local Express app at `/Users/beebee/Desktop/personal project/ATS-Checker`.
 
-- [ ] **T3.1 — ATS-Checker Service Client (`ats_adapter.py`)**
+- [x] **T3.1 — ATS-Checker Service Client (`ats_adapter.py`)**
   - Implement HTTP client targeting the local Express ATS-Checker backend (`/api/scans/analyze` or upload endpoint).
   - Add fallback to CLI invocation (`npx tsx src/index.ts`) if the local HTTP server is not yet running.
-- [ ] **T3.2 — Health Check & Live Ping (`GET /api/ats/health`)**
+- [x] **T3.2 — Health Check & Live Ping (`GET /api/ats/health`)**
   - Add endpoint checking connectivity to the local ATS-Checker service.
   - Surface live connection badge in Next.js Settings and ATS Studio pages.
-- [ ] **T3.3 — Output Normalization to `MatchEvaluation`**
+- [x] **T3.3 — Output Normalization to `MatchEvaluation`**
   - Map the ATS-Checker's real response (scores, missing keywords, section breakdown) into canonical `MatchEvaluation`.
 
 ---
