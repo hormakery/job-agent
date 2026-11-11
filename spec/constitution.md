@@ -1,45 +1,53 @@
 # Project Constitution: Autonomous Job Application & Interview Coordinator (`job-agent`)
 
 > **Spec-Driven Development (SDD) Ground Rules & Architectural Guardrails**
-> Version: 1.1.0 (Full-Stack: Backend Agents + FastAPI + Next.js Frontend Dashboard) | Status: Active
+> Version: 2.0.0 (Full-Stack Real-World Architecture: Zero Seed Data, Real Google Auth & Application Dispatch) | Status: Active
 
 ---
 
 ## 1. Core Mission
-Build a reliable, token-efficient, **full-stack** 4-agent autonomous job application and interview coordination platform powered by **Google Gemini (`google-genai`)**, **LangGraph**, **FastAPI**, a **Next.js (React + TypeScript + Tailwind CSS) Web Dashboard**, **Google Workspace APIs** (Sheets, Drive, Gmail, Calendar), **Telegram Bot (Human-in-the-Loop)**, and the user's **existing local ATS Checker**.
+Build a reliable, token-efficient, **full-stack** 4-agent autonomous job application, dispatch, and interview coordination platform powered by **Google Gemini (`google-genai`)**, **LangGraph**, **FastAPI**, a **Next.js 15 (React 19 + TypeScript + Tailwind CSS, `pnpm`) Web Dashboard**, **Google Workspace APIs** (Gmail, Google Sheets, Google Drive, Google Calendar), and the user's **existing local ATS Checker (`ATS-Checker`)**.
 
 ---
 
 ## 2. Non-Negotiable Architectural Guardrails
 
-### Rule 1: Reuse the Existing Local ATS Checker (No Reinvention)
-* The user has **already built a local ATS Resume Checker**.
-* **Do NOT build a new ATS scoring algorithm from scratch.**
-* Agent 2 and the Frontend ATS Sandbox MUST integrate with the existing local ATS checker through a clean **Adapter Pattern** (`ATSCheckerAdapter`) supporting:
-  1. **Direct Python Module Import** (if the existing ATS checker is a local Python package/script),
-  2. **Local HTTP/REST Call** (if the local ATS checker runs as a local server on `localhost`), or
-  3. **CLI Subprocess Bridge** (invoking the local ATS checker script/binary and parsing JSON stdout).
-* `gemini-2.5-flash` may only be used as a structured normalizer/fallback if the local ATS output needs formatting into the `MatchEvaluation` schema (`match_score`, `missing_critical_skills`, `passed_threshold`, `reasoning`).
+### Rule 1: Zero Fake / Seed Data (Truthful State Guarantee)
+* The system MUST NEVER populate fake, dummy, or hardcoded application records (such as sample "Stripe" or "Apple" rows with synthetic "Interview Requested" statuses).
+* If no applications have been submitted, the dashboard must truthfully display `0 Jobs Applied`.
+* If Google credentials or local services are disconnected, the dashboard must explicitly display a disconnected warning with connection actions—not simulate false progress.
 
-### Rule 2: Strict $\ge 50\%$ Match Score Gatekeeper
-* Every scraped job MUST pass through the pre-assessment gate before any resume tailoring or PDF generation occurs.
+### Rule 2: Explicit Application Dispatch Before Interview Tracking
+* An application record CANNOT transition from `Tailored & Ready` to `Interview Requested` without passing through the **Application Dispatch** stage (`Applied`).
+* Every application must track its explicit submission method:
+  1. **Direct Email Application (`email_submission`)**: Agent prepares a tailored cover email + attaches the tailored resume PDF, candidate's LinkedIn URL, portfolio, and phone number, and dispatches via Gmail API (or saves as Gmail Draft for user review).
+  2. **Portal / Form Application (`portal_submission`)**: For LinkedIn Easy Apply, Greenhouse, Lever, Ashby, Workday, or Google Forms, the system tracks the application portal URL, pre-generates tailored responses for screening questions, and records the submission timestamp.
+* Agent 3 (Inbox Monitor) only monitors for confirmation, assessment, rejection, or interview requests for jobs that have actually reached `Applied` status.
+
+### Rule 3: Single Web Command Center (No External Telegram Friction)
+* All job assessments, ATS gate scores, resume edits, application email approvals, and interview scheduling take place directly in the **Next.js Web Dashboard** (`http://localhost:3001`).
+* **Telegram is removed.** No bot tokens, chat IDs, or localhost webhooks are required.
+
+### Rule 4: Reuse the Existing Local ATS Checker (`ATS-Checker`)
+* The user's existing ATS checker is located at `/Users/beebee/Desktop/personal project/ATS-Checker`.
+* Agent 2 MUST interface with this existing ATS checker via the configurable `ATSCheckerAdapter` (HTTP endpoint or subprocess), evaluating candidate fit against the Job Description.
+* `gemini-2.5-flash` is used as a fallback/normalizer only if the local ATS checker is unreachable.
+
+### Rule 5: Strict $\ge 50\%$ Match Score Gatekeeper
+* Every scraped job MUST pass through the pre-assessment gate before any resume tailoring occurs.
 * **If `match_score < 50`:**
   * Immediately halt tailoring for that job (`gemini-2.5-pro` MUST NOT be called).
-  * Record the row in Google Sheets with `Passed Gate (>=50%) = FALSE`, `Status = Skipped (<50% Match)`, and populate `Gap Analysis` with the missing critical skills and reason.
+  * Record the row with `Passed Gate (>=50%) = FALSE`, `Status = Skipped (<50% Match)`, and populate `Gap Analysis` with missing critical skills.
 * **If `match_score >= 50`:**
-  * Proceed to `gemini-2.5-pro` tailoring, Markdown-to-PDF rendering, and Google Drive upload.
+  * Proceed to `gemini-2.5-pro` tailoring, Markdown-to-PDF rendering, and application packaging.
 
-### Rule 3: Zero Hallucination / Zero Fabrication in Resume Tailoring
-* When `gemini-2.5-pro` rewrites resume bullet points using the STAR method and high-impact metrics, it MUST strictly rephrase and emphasize **real accomplishments, skills, and projects** present in the Master Resume.
+### Rule 6: Zero Hallucination / Zero Fabrication in Resume Tailoring
+* When `gemini-2.5-pro` rewrites resume bullet points using the STAR method and impact metrics, it MUST strictly rephrase and emphasize **real accomplishments, skills, and projects** present in the Master Resume (`data/master_resume.md`).
 * It MUST NEVER invent employers, degrees, certifications, metrics, or technologies not grounded in the Master Resume.
 
-### Rule 4: Google Sheets as the Single Source of Truth (Idempotency)
-* All 4 agents and the Frontend Web UI read and write state through the centralized Google Sheet (`gspread`), exposed to the frontend via FastAPI endpoints with local caching to respect rate limits.
-* Every job listing is uniquely identified by `Job ID` = `MD5(normalize(company_name) + "_" + normalize(role_title))`.
-* Upsert operations MUST be idempotent: re-running Agent 1 or Agent 2 on the same job listing must not create duplicate rows in Google Sheets.
-
-### Rule 5: Dual Human-in-the-Loop (HITL) Safety (Web UI + Telegram Bot)
-* **Calendar & Email Safety:** Agent 3 and Agent 4 MUST NEVER automatically send an email reply to a recruiter or book a confirmed calendar invite without explicit user approval via either the **Frontend Web Dashboard** OR the **Telegram Bot** inline confirmation flow.
+### Rule 7: Sourcing Platform Transparency & Candidate Profile Injection
+* Every scraped job listing must explicitly preserve its origin platform tag: `LinkedIn`, `Indeed`, `Glassdoor`, `ZipRecruiter`, or `Direct Career Site`.
+* The candidate's real profile information (`FULL_NAME`, `CANDIDATE_EMAIL`, `CANDIDATE_PHONE`, `LINKEDIN_URL`, `GITHUB_URL`, `PORTFOLIO_URL`) must be injected into all application payloads and cover drafts.
 
 ---
 
@@ -48,23 +56,19 @@ Build a reliable, token-efficient, **full-stack** 4-agent autonomous job applica
 | Layer | Standard Choice | Notes |
 | :--- | :--- | :--- |
 | **Backend Language & Runtime** | Python $\ge 3.11$ | Managed via `uv` or `venv` |
-| **Backend Web API** | `FastAPI` + `Uvicorn` | REST API + Server-Sent Events (SSE) for live agent status streaming to Frontend |
-| **Frontend Framework** | `Next.js 15` (App Router, React 19, TypeScript, managed via `pnpm`) | Styled with `Tailwind CSS` + `shadcn/ui` + `Lucide Icons` |
-| **LLM SDK** | `google-genai` (Official SDK) | `gemini-2.5-flash` (extraction/classification), `gemini-2.5-pro` (resume tailoring) |
+| **Backend Web API** | `FastAPI` + `Uvicorn` | REST API + Server-Sent Events (SSE) for live agent status streaming |
+| **Frontend Framework** | `Next.js 15` (App Router, React 19, TypeScript, `pnpm`) | Styled with `Tailwind CSS` + `Lucide Icons` |
+| **LLM SDK** | `google-genai` (Official SDK) | `gemini-2.5-flash` (extraction/screening), `gemini-2.5-pro` (resume tailoring) |
 | **Orchestration** | `langgraph` | StateGraph coordinating Agents 1–4 |
-| **Data Validation** | `pydantic` ($\ge 2.0$) | Strict schemas shared across Agents, FastAPI, and OpenAPI types |
-| **Job Sourcing (Agent 1)** | JSearch API (RapidAPI) | Behind a pluggable `JobSourceProvider` interface |
-| **ATS Evaluation (Agent 2)** | Existing Local ATS Checker | Connected via `ATSCheckerAdapter` |
-| **Resume PDF & Storage** | Markdown $\rightarrow$ PDF (`weasyprint` / `reportlab`) + Google Drive API | Uploads tailored PDF and serves local/Drive preview in Frontend |
-| **State Database** | Google Sheets (`gspread` + `google-auth`) | Canonical relational state store synced with Frontend UI |
-| **Inbox Monitor (Agent 3)** | Gmail API (`google-api-python-client`) | OAuth2 user credentials |
-| **Calendar & HITL (Agent 4)** | Google Calendar API + Web UI + `python-telegram-bot` | Slot selection & email approval in both Web UI and Telegram |
-| **Testing** | `pytest` (Backend) + `Vitest` / `Playwright` (Frontend) | Unit tests + end-to-end API/UI verification |
+| **ATS Evaluation (Agent 2)** | Existing Local ATS Checker (`ATS-Checker`) | Connected via `ATSCheckerAdapter` |
+| **State Database** | Google Sheets (`gspread` + Google OAuth2 / Service Account) | Synchronized live with UI |
+| **Inbox & Outbox (Agent 3)** | Gmail API (`google-api-python-client`) | Reads unread recruiter emails & sends/drafts application replies |
+| **Calendar (Agent 4)** | Google Calendar API | Queries open slots & books interview events |
+| **Testing** | `pytest` (Backend) | Unit tests + integration verification |
 
 ---
 
-## 4. Coding & Repository Conventions
-1. **Monorepo Layout:** Backend lives in `backend/` (or `src/job_agent/`) and Frontend lives in `frontend/` with a unified root runner/Makefile.
-2. **Modular Agent Boundaries:** Each agent resides in its own module under `src/job_agent/agents/` with clearly typed input/output contracts.
-3. **Configuration via Environment Variables:** All API keys, OAuth token paths, Google Sheet IDs, Telegram chat IDs, and the local ATS checker path/URL MUST be loaded via `pydantic-settings` from `.env`. Never hardcode secrets.
-4. **Structured Logging & Real-Time UI Telemetry:** Every state transition, gate decision, and API call must log structured context (`job_id`, `company`, `agent`, `status`) and stream to the Frontend Activity Log.
+## 4. Coding & Security Conventions
+1. **No Hardcoded Secrets or Seed Items:** All API keys, tokens, and candidate info are loaded from `.env`. Zero dummy data committed to disk.
+2. **Git Hygiene:** `.env`, `.env.*`, `credentials/*.json`, and runtime data are strictly excluded in `.gitignore`.
+3. **Graceful Degraded Modes:** When a third-party service is disconnected, the UI displays clear, actionable connection instructions.
