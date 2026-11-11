@@ -4,6 +4,7 @@ import {
   CandidateProfile,
   DashboardStats,
   EmailClassification,
+  GoogleAuthStatus,
   InterviewCoordinationItem,
   JobSheetRow,
   MatchEvaluation,
@@ -159,6 +160,65 @@ export async function saveCandidateProfile(profile: CandidateProfile): Promise<C
 export async function fetchApplications(): Promise<ApplicationDispatchItem[]> {
   const res = await fetch(`${API_BASE}/api/applications`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to load applications");
+  return res.json();
+}
+
+export async function fetchGoogleAuthStatus(): Promise<GoogleAuthStatus> {
+  const res = await fetch(`${API_BASE}/api/auth/google/status`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to load Google auth status");
+  return res.json();
+}
+
+export async function getGoogleAuthUrl(redirectUri?: string): Promise<{ url: string; state: string }> {
+  const url = new URL(`${API_BASE}/api/auth/google/url`);
+  if (redirectUri) url.searchParams.set("redirect_uri", redirectUri);
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Failed to generate Google OAuth URL" }));
+    throw new Error(err.detail || "Failed to generate Google OAuth URL");
+  }
+  return res.json();
+}
+
+export async function submitGoogleAuthCallback(code: string, redirectUri?: string): Promise<Record<string, any>> {
+  const res = await fetch(`${API_BASE}/api/auth/google/callback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, redirect_uri: redirectUri }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "OAuth exchange failed" }));
+    throw new Error(err.detail || "OAuth exchange failed");
+  }
+  return res.json();
+}
+
+export async function disconnectGoogleAccount(): Promise<{ connected: boolean }> {
+  const res = await fetch(`${API_BASE}/api/auth/google/disconnect`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to disconnect Google account");
+  return res.json();
+}
+
+export async function saveGoogleClientSecret(clientId: string, clientSecret: string): Promise<{ saved: boolean }> {
+  const res = await fetch(`${API_BASE}/api/auth/google/client-secret`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret }),
+  });
+  if (!res.ok) throw new Error("Failed to save client secrets");
+  return res.json();
+}
+
+export async function syncAllJobsToGoogleSheet(): Promise<{ synced_count: number; sheet_id: string }> {
+  const res = await fetch(`${API_BASE}/api/google/sheets/sync-all`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Failed to sync to Google Sheet" }));
+    throw new Error(err.detail || "Failed to sync to Google Sheet");
+  }
   return res.json();
 }
 

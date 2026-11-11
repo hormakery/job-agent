@@ -13,10 +13,10 @@
 ---
 
 ## Gate 2: Real Google Workspace OAuth2 Quality Gate
-- [ ] **C2.1:** `/api/auth/google/url` returns a valid Google OAuth2 authorization link requesting required scopes (`gmail.modify`, `gmail.compose`, `spreadsheets`, `drive.file`, `calendar`).
-- [ ] **C2.2:** Completing the OAuth2 flow saves valid tokens in `credentials/token.json` and updates `/api/auth/google/status` with the connected email address.
-- [ ] **C2.3:** Live Google Sheets sync verifies that newly created or updated applications write directly to the user's remote Google Sheet.
-- [ ] **C2.4:** Live Google Drive upload creates a valid PDF in the user's specified folder and returns an accessible `webViewLink`.
+- [x] **C2.1:** `/api/auth/google/url` returns a valid Google OAuth2 authorization link requesting required scopes (`gmail.modify`, `gmail.compose`, `spreadsheets`, `drive.file`, `calendar`).
+- [x] **C2.2:** Completing the OAuth2 flow saves valid tokens in `credentials/token.json` and updates `/api/auth/google/status` with the connected email address.
+- [x] **C2.3:** Live Google Sheets sync verifies that newly created or updated applications write directly to the user's remote Google Sheet.
+- [x] **C2.4:** Live Google Drive upload creates a valid PDF in the user's specified folder and returns an accessible `webViewLink`.
 
 ---
 

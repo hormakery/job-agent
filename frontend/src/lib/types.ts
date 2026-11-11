@@ -17,6 +17,16 @@ export type SourcePlatform =
 
 export type SubmissionMethod = "email_submission" | "portal_submission";
 
+export interface GoogleAuthStatus {
+  connected: boolean;
+  mode: "oauth2" | "service_account" | "disconnected";
+  email: string | null;
+  scopes: string[];
+  has_client_secret: boolean;
+  sheet_id?: string | null;
+  drive_folder_id?: string | null;
+}
+
 export interface CandidateProfile {
   full_name: string;
   email: string;

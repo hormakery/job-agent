@@ -30,21 +30,21 @@
 ## Phase 2: Real Google Workspace OAuth2 Integration
 **Goal:** Enable real Google account authentication for Gmail, Google Sheets, Google Drive, and Google Calendar.
 
-- [ ] **T2.1 — Google OAuth2 Flow Backend (`src/job_agent/integrations/google_auth.py`)**
+- [x] **T2.1 — Google OAuth2 Flow Backend (`src/job_agent/integrations/google_auth.py`)**
   - Implement Google OAuth2 web flow using `google-auth-oauthlib`:
     - Scopes: `gmail.modify`, `gmail.compose`, `spreadsheets`, `drive.file`, `calendar`.
     - `GET /api/auth/google/url`: Returns Google OAuth authorization URL.
     - `POST /api/auth/google/callback`: Exchanges code for refresh token and stores in `credentials/token.json`.
     - `GET /api/auth/google/status`: Returns whether user is connected and authenticated email address.
     - `POST /api/auth/google/disconnect`: Revokes and deletes token.
-- [ ] **T2.2 — Real Google Sheets Sync (`sheets_client.py`)**
+- [x] **T2.2 — Real Google Sheets Sync (`sheets_client.py`)**
   - Connect `gspread` using live OAuth credentials / service account.
   - Create the canonical 13-column sheet header if sheet is new.
   - Implement real row read/write/update methods.
-- [ ] **T2.3 — Real Google Drive Uploader (`drive_client.py`)**
+- [x] **T2.3 — Real Google Drive Uploader (`drive_client.py`)**
   - Upload tailored resume PDFs directly to user's Google Drive folder (`GOOGLE_DRIVE_RESUME_FOLDER_ID`) using live OAuth credentials.
   - Return shareable `webViewLink` for the Google Sheet.
-- [ ] **T2.4 — Next.js Google Account Connection Card (`/settings`)**
+- [x] **T2.4 — Next.js Google Account Connection Card (`/settings`)**
   - Add "Connect Google Account" button initiating OAuth flow.
   - Display connected account email, active Google services badges (Gmail, Sheets, Drive, Calendar), and "Disconnect" button.
 
