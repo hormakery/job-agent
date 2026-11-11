@@ -1,7 +1,7 @@
 from pathlib import Path
 from job_agent.agents.agent4_calendar import Agent4CalendarCoordinator
 from job_agent.integrations.sheets_client import GoogleSheetsClient
-from job_agent.models.schemas import EmailClassification, compute_job_id
+from job_agent.models.schemas import EmailClassification, JobSheetRow, compute_job_id
 
 
 def test_agent4_prepares_slots_and_confirms_only_on_approval(tmp_path: Path):
@@ -9,6 +9,18 @@ def test_agent4_prepares_slots_and_confirms_only_on_approval(tmp_path: Path):
     agent4 = Agent4CalendarCoordinator(sheets_client=sheets)
 
     vercel_id = compute_job_id("Vercel", "Senior Frontend & Next.js Engineer")
+    sheets.upsert_job_row(
+        JobSheetRow(
+            job_id=vercel_id,
+            company_name="Vercel",
+            role_title="Senior Frontend & Next.js Engineer",
+            initial_match_score=85,
+            passed_gate=True,
+            gap_analysis="Strong Next.js alignment",
+            status="Applied",
+            date_applied="2026-11-01",
+        )
+    )
     invite_email = EmailClassification(
         thread_id="th_vercel_99",
         company_name="Vercel",

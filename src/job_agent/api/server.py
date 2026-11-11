@@ -17,15 +17,14 @@ from job_agent.integrations.gmail_client import GmailClient
 from job_agent.integrations.jsearch_client import JSearchProvider
 from job_agent.integrations.pdf_renderer import render_markdown_to_pdf
 from job_agent.integrations.sheets_client import GoogleSheetsClient
-from job_agent.integrations.telegram_bot import TelegramHitlNotifier
-from job_agent.models.schemas import ApplicationStatus, ExtractedJobListing
+from job_agent.models.schemas import ApplicationStatus, CandidateProfile, ExtractedJobListing
 from job_agent.workflows.inbox_graph import run_inbox_and_calendar_workflow
 from job_agent.workflows.sourcing_graph import run_sourcing_and_tailoring_workflow
 
 app = FastAPI(
-    title="Job-Agent Full-Stack Orchestrator API",
-    version="0.1.0",
-    description="FastAPI Backend coordinating Agents 1-4, Local ATS Checker, Google Workspace, and Telegram HITL.",
+    title="JobAgent OS Backend API",
+    version="2.0.0",
+    description="FastAPI Backend coordinating Agents 1-4, Local ATS Checker, Google Workspace, and Web HITL.",
 )
 
 app.add_middleware(
@@ -40,6 +39,7 @@ app.add_middleware(
 class StatusUpdateRequest(BaseModel):
     status: ApplicationStatus
     interview_date: Optional[str] = None
+    date_applied: Optional[str] = None
 
 
 class SourceWorkflowRequest(BaseModel):
@@ -75,21 +75,18 @@ def get_health() -> dict:
     gmail = GmailClient()
     cal = GoogleCalendarClient()
     jsearch = JSearchProvider()
-    tg = TelegramHitlNotifier()
     has_gemini = bool(settings.gemini_api_key and settings.gemini_api_key != "your_gemini_api_key_here")
+
+    ats_repo_exists = Path(settings.ats_local_repo_path).exists()
 
     return {
         "status": "ok",
         "ats_threshold": settings.ats_match_threshold,
         "integrations": {
             "local_ats_checker": {
-                "connected": True,
+                "connected": ats_repo_exists,
                 "mode": settings.ats_integration_mode,
-                "endpoint_or_path": (
-                    settings.ats_local_http_url
-                    if settings.ats_integration_mode == "http_local"
-                    else settings.ats_local_repo_path
-                ),
+                "endpoint_or_path": settings.ats_local_repo_path,
             },
             "gemini_llm": {
                 "connected": has_gemini,
@@ -97,7 +94,7 @@ def get_health() -> dict:
             },
             "google_sheets": {
                 "connected": sheets.is_google_sheets_connected(),
-                "mode": "gspread_live" if sheets.is_google_sheets_connected() else "local_mirror_active",
+                "mode": "gspread_live" if sheets.is_google_sheets_connected() else "unconnected",
             },
             "google_drive": {
                 "connected": drive.is_configured(),
@@ -109,9 +106,36 @@ def get_health() -> dict:
             },
             "gmail_api": {"connected": gmail.is_configured()},
             "google_calendar": {"connected": cal.is_configured()},
-            "telegram_bot": {"connected": tg.is_configured()},
         },
     }
+
+
+# Candidate Profile Endpoints
+@app.get("/api/candidate-profile")
+def get_candidate_profile() -> dict:
+    if settings.candidate_profile_file.exists():
+        try:
+            return json.loads(settings.candidate_profile_file.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    profile = CandidateProfile(
+        full_name=settings.candidate_name,
+        email=settings.candidate_email,
+        phone=settings.candidate_phone,
+        linkedin_url=settings.candidate_linkedin_url,
+        github_url=settings.candidate_github_url,
+        portfolio_url=settings.candidate_portfolio_url,
+        location=settings.candidate_location,
+    )
+    return profile.model_dump()
+
+
+@app.put("/api/candidate-profile")
+def update_candidate_profile(profile: CandidateProfile) -> dict:
+    settings.candidate_profile_file.parent.mkdir(parents=True, exist_ok=True)
+    settings.candidate_profile_file.write_text(json.dumps(profile.model_dump(), indent=2), encoding="utf-8")
+    return profile.model_dump()
 
 
 @app.get("/api/dashboard/stats")
@@ -143,11 +167,20 @@ def get_job(job_id: str) -> dict:
 def update_job_status(job_id: str, payload: StatusUpdateRequest) -> dict:
     sheets = GoogleSheetsClient()
     updated = sheets.update_job_status(
-        job_id=job_id, status=payload.status, interview_date=payload.interview_date
+        job_id=job_id,
+        status=payload.status,
+        interview_date=payload.interview_date,
+        date_applied=payload.date_applied,
     )
     if not updated:
         raise HTTPException(status_code=404, detail="Job not found")
     return updated.model_dump()
+
+
+@app.get("/api/applications")
+def list_applications() -> list[dict]:
+    sheets = GoogleSheetsClient()
+    return [a.model_dump() for a in sheets.get_applications()]
 
 
 @app.post("/api/workflows/source")
@@ -198,11 +231,14 @@ def tailor_specific_job(job_id: str) -> dict:
         job_id=job_row.job_id,
         company_name=job_row.company_name,
         role_title=job_row.role_title,
+        source_platform=job_row.source_platform,
         location=job_row.location,
         is_remote=job_row.is_remote,
         sponsorship_explicitly_mentioned=job_row.sponsorship_explicitly_mentioned,
         job_url=job_row.job_url,
         raw_description=job_row.raw_description,
+        application_method=job_row.submission_method,
+        application_email=job_row.application_email,
     )
     agent2 = Agent2GatekeeperAndTailor(sheets_client=sheets)
     updated_row = agent2.process_job(listing, force_tailor=True)

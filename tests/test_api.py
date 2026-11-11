@@ -9,18 +9,24 @@ def test_all_spec_api_routes():
     assert client.get("/api/health").status_code == 200
     stats = client.get("/api/dashboard/stats").json()
     assert "total_jobs_sourced" in stats
+    assert "application_drafted_count" in stats
 
-    # 2. Jobs listing & filtering
+    # 2. Candidate Profile GET and PUT
+    prof_res = client.get("/api/candidate-profile")
+    assert prof_res.status_code == 200
+    prof = prof_res.json()
+    assert "linkedin_url" in prof
+    assert "email" in prof
+
+    # 3. Jobs listing & filtering (empty initial state)
     jobs = client.get("/api/jobs").json()
-    assert len(jobs) >= 1
-    first_job_id = jobs[0]["job_id"]
+    assert isinstance(jobs, list)
 
-    # 3. Single job & resume preview
-    preview = client.get(f"/api/resumes/{first_job_id}/preview")
-    assert preview.status_code == 200
-    assert preview.json()["job_id"] == first_job_id
+    # 4. Applications listing
+    apps = client.get("/api/applications").json()
+    assert isinstance(apps, list)
 
-    # 4. Local ATS Checker sandbox endpoint
+    # 5. Local ATS Checker sandbox endpoint
     ats_resp = client.post(
         "/api/ats/evaluate",
         json={
@@ -30,19 +36,14 @@ def test_all_spec_api_routes():
     assert ats_resp.status_code == 200
     assert ats_resp.json()["passed_threshold"] is True
 
-    # 5. Master Resume GET
+    # 6. Master Resume GET
     mr = client.get("/api/master-resume")
     assert mr.status_code == 200
     assert "ALEX MERCER" in mr.json()["content"]
 
-    # 6. Inbox threads & interview slots
+    # 7. Inbox threads
     inbox = client.get("/api/inbox/threads")
     assert inbox.status_code == 200
-    interviews = inbox.json()["interviews"]
-    assert len(interviews) >= 1
-    interview_job_id = interviews[0]["job_id"]
-
-    slots = client.get(f"/api/interviews/{interview_job_id}/slots")
-    assert slots.status_code == 200
-    assert len(slots.json()["available_slots"]) >= 1
+    assert "emails" in inbox.json()
+    assert "interviews" in inbox.json()
 

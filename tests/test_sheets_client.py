@@ -9,7 +9,7 @@ def test_idempotent_upsert_and_deduplication(tmp_path: Path):
     client = GoogleSheetsClient(state_file=state_file)
 
     initial_ids = client.get_existing_job_ids()
-    assert len(initial_ids) >= 5
+    assert len(initial_ids) == 0
 
     job_id = compute_job_id("Acme Corp", "Platform Engineer")
     row_v1 = JobSheetRow(
