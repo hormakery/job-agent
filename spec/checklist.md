@@ -5,10 +5,10 @@
 ---
 
 ## Gate 1: Clean Slate & Candidate Profile Quality Gate
-- [ ] **C1.1:** `data/state_store.json` contains no hardcoded or fake application entries.
-- [ ] **C1.2:** The Next.js dashboard truthfully displays `0 Jobs Sourced, 0 Applied` when no real jobs exist.
-- [ ] **C1.3:** `CandidateProfile` model is implemented with `full_name`, `email`, `phone`, `linkedin_url`, `github_url`, and `portfolio_url`.
-- [ ] **C1.4:** Telegram code and configuration keys are fully removed from the codebase.
+- [x] **C1.1:** `data/state_store.json` contains no hardcoded or fake application entries.
+- [x] **C1.2:** The Next.js dashboard truthfully displays `0 Jobs Sourced, 0 Applied` when no real jobs exist.
+- [x] **C1.3:** `CandidateProfile` model is implemented with `full_name`, `email`, `phone`, `linkedin_url`, `github_url`, and `portfolio_url`.
+- [x] **C1.4:** Telegram code and configuration keys are fully removed from the codebase.
 
 ---
 

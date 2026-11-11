@@ -1,5 +1,7 @@
 import {
+  ApplicationDispatchItem,
   ApplicationStatus,
+  CandidateProfile,
   DashboardStats,
   EmailClassification,
   InterviewCoordinationItem,
@@ -135,6 +137,28 @@ export async function confirmInterviewSlot(
 export async function fetchHealth(): Promise<Record<string, any>> {
   const res = await fetch(`${API_BASE}/api/health`, { cache: "no-store" });
   if (!res.ok) throw new Error("Backend offline");
+  return res.json();
+}
+
+export async function fetchCandidateProfile(): Promise<CandidateProfile> {
+  const res = await fetch(`${API_BASE}/api/candidate-profile`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to load candidate profile");
+  return res.json();
+}
+
+export async function saveCandidateProfile(profile: CandidateProfile): Promise<CandidateProfile> {
+  const res = await fetch(`${API_BASE}/api/candidate-profile`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile),
+  });
+  if (!res.ok) throw new Error("Failed to save candidate profile");
+  return res.json();
+}
+
+export async function fetchApplications(): Promise<ApplicationDispatchItem[]> {
+  const res = await fetch(`${API_BASE}/api/applications`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to load applications");
   return res.json();
 }
 

@@ -74,7 +74,7 @@ export default function InboxAndInterviewsPage() {
             Agent 3 &amp; Agent 4: Inbox Monitor &amp; Calendar HITL Coordinator
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Classifies recruiter replies via Gemini 2.5 Flash, finds open Google Calendar slots, and coordinates human approval (Web UI + Telegram Bot)
+            Classifies recruiter replies via Gemini 2.5 Flash, finds open Google Calendar slots, and coordinates human approval
           </p>
         </div>
 
@@ -97,47 +97,58 @@ export default function InboxAndInterviewsPage() {
           </span>
         </h2>
 
-        <div className="grid grid-cols-1 gap-6">
-          {interviews.map((item) => {
-            const isConfirmed = item.status === "scheduled_and_sent";
-            return (
-              <div
-                key={item.job_id}
-                className="p-6 rounded-xl bg-slate-900/90 border border-slate-800 space-y-5"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-lg font-bold text-white">
-                        {item.company_name} — {item.role_title}
-                      </span>
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                          isConfirmed
-                            ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
-                            : "bg-amber-950 text-amber-300 border border-amber-700"
-                        }`}
-                      >
-                        {isConfirmed
-                          ? "Booked on Google Calendar & Reply Sent"
-                          : "Awaiting Your Slot Selection"}
-                      </span>
+        {interviews.length === 0 ? (
+          <div className="p-8 rounded-xl bg-slate-900/60 border border-slate-800 text-center space-y-2">
+            <CalendarCheck className="w-8 h-8 text-slate-500 mx-auto" />
+            <h3 className="text-sm font-semibold text-slate-200">
+              No interview invitations awaiting coordination
+            </h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              When recruiter email invitations are classified from your inbox, Agent 4 will present open Google Calendar slots and draft replies here for your one-click approval.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6">
+            {interviews.map((item) => {
+              const isConfirmed = item.status === "scheduled_and_sent";
+              return (
+                <div
+                  key={item.job_id}
+                  className="p-6 rounded-xl bg-slate-900/90 border border-slate-800 space-y-5"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-lg font-bold text-white">
+                          {item.company_name} — {item.role_title}
+                        </span>
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            isConfirmed
+                              ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                              : "bg-amber-950 text-amber-300 border border-amber-700"
+                          }`}
+                        >
+                          {isConfirmed
+                            ? "Booked on Google Calendar & Reply Sent"
+                            : "Awaiting Your Slot Selection"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Recruiter: {item.recruiter_email} • Subject: {item.subject}
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Recruiter: {item.recruiter_email} • Subject: {item.subject}
-                    </p>
                   </div>
-                </div>
 
-                <p className="text-sm text-slate-300 bg-slate-950 p-3.5 rounded-lg border border-slate-800">
-                  &ldquo;{item.email_summary}&rdquo;
-                </p>
+                  <p className="text-sm text-slate-300 bg-slate-950 p-3.5 rounded-lg border border-slate-800">
+                    &ldquo;{item.email_summary}&rdquo;
+                  </p>
 
-                {/* Available Google Calendar Slots */}
-                <div className="space-y-2">
-                  <div className="text-xs font-semibold uppercase text-slate-400">
-                    Select Open Google Calendar Slot (Synced with Telegram Bot):
-                  </div>
+                  {/* Available Google Calendar Slots */}
+                  <div className="space-y-2">
+                    <div className="text-xs font-semibold uppercase text-slate-400">
+                      Select Open Google Calendar Slot:
+                    </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {item.available_slots.map((slot) => {
                       const active = selectedSlots[item.job_id] === slot.slot_id;
@@ -211,6 +222,7 @@ export default function InboxAndInterviewsPage() {
             );
           })}
         </div>
+      )}
       </div>
 
       {/* Agent 3 Classified Gmail Feed */}
@@ -220,42 +232,54 @@ export default function InboxAndInterviewsPage() {
           <span>Agent 3: Classified Recruiter Inbox Threads</span>
         </h2>
 
-        <div className="rounded-xl bg-slate-900/90 border border-slate-800 divide-y divide-slate-800">
-          {emails.map((em) => (
-            <div
-              key={em.thread_id}
-              className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2.5">
-                  <span className="font-semibold text-white text-sm">
-                    {em.company_name}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    ({em.sender_email})
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                      em.category === "Interview Invite"
-                        ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
-                        : em.category === "Assessment Request"
-                        ? "bg-amber-950 text-amber-300 border border-amber-700"
-                        : em.category === "Rejection"
-                        ? "bg-rose-950 text-rose-300 border border-rose-700"
-                        : "bg-slate-800 text-slate-300"
-                    }`}
-                  >
-                    {em.category}
-                  </span>
+        {emails.length === 0 ? (
+          <div className="p-8 rounded-xl bg-slate-900/60 border border-slate-800 text-center space-y-2">
+            <Mail className="w-8 h-8 text-slate-500 mx-auto" />
+            <h3 className="text-sm font-semibold text-slate-200">
+              No recruiter inbox messages classified yet
+            </h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Click &quot;Scan Gmail Inbox Now&quot; above to fetch unread recruiter responses from companies you applied to.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-slate-900/90 border border-slate-800 divide-y divide-slate-800">
+            {emails.map((em) => (
+              <div
+                key={em.thread_id}
+                className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-semibold text-white text-sm">
+                      {em.company_name}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      ({em.sender_email})
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                        em.category === "Interview Invite"
+                          ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                          : em.category === "Assessment Request"
+                          ? "bg-amber-950 text-amber-300 border border-amber-700"
+                          : em.category === "Rejection"
+                          ? "bg-rose-950 text-rose-300 border border-rose-700"
+                          : "bg-slate-800 text-slate-300"
+                      }`}
+                    >
+                      {em.category}
+                    </span>
+                  </div>
+                  <div className="text-xs font-medium text-slate-200">
+                    {em.subject}
+                  </div>
+                  <p className="text-xs text-slate-400">{em.summary}</p>
                 </div>
-                <div className="text-xs font-medium text-slate-200">
-                  {em.subject}
-                </div>
-                <p className="text-xs text-slate-400">{em.summary}</p>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -19,6 +19,8 @@ import {
   Terminal,
   ArrowUpRight,
   Sparkles,
+  Send,
+  Briefcase,
 } from "lucide-react";
 
 export default function CommandCenterPage() {
@@ -132,7 +134,7 @@ export default function CommandCenterPage() {
         <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
           <div className="text-xs text-slate-400 font-medium">Total Sourced</div>
           <div className="text-2xl font-bold text-white mt-1">
-            {stats?.total_jobs_sourced ?? "—"}
+            {stats?.total_jobs_sourced ?? 0}
           </div>
           <div className="text-xs text-slate-400 mt-1">
             Avg Score: {stats?.average_match_score ?? 0}%
@@ -145,23 +147,10 @@ export default function CommandCenterPage() {
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl font-bold text-emerald-300 mt-1">
-            {stats?.passed_gate_count ?? "—"}
+            {stats?.passed_gate_count ?? 0}
           </div>
           <div className="text-xs text-emerald-400/80 mt-1">
             Tailored via Gemini 2.5 Pro
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-rose-950/30 border border-rose-800/50">
-          <div className="flex items-center justify-between text-xs text-rose-300 font-medium">
-            <span>Skipped (&lt;50%)</span>
-            <XCircle className="w-4 h-4 text-rose-400" />
-          </div>
-          <div className="text-2xl font-bold text-rose-300 mt-1">
-            {stats?.skipped_below_threshold_count ?? "—"}
-          </div>
-          <div className="text-xs text-rose-400/80 mt-1">
-            Saved Pro API tokens
           </div>
         </div>
 
@@ -171,9 +160,24 @@ export default function CommandCenterPage() {
             <FileText className="w-4 h-4 text-indigo-400" />
           </div>
           <div className="text-2xl font-bold text-white mt-1">
-            {stats?.tailored_ready_count ?? "—"}
+            {stats?.tailored_ready_count ?? 0}
           </div>
-          <div className="text-xs text-slate-400 mt-1">PDF &amp; Drive linked</div>
+          <div className="text-xs text-slate-400 mt-1">
+            Drafted: {stats?.application_drafted_count ?? 0}
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-blue-950/30 border border-blue-800/50">
+          <div className="flex items-center justify-between text-xs text-blue-300 font-medium">
+            <span>Applications Sent</span>
+            <Send className="w-4 h-4 text-blue-400" />
+          </div>
+          <div className="text-2xl font-bold text-blue-300 mt-1">
+            {stats?.applied_count ?? 0}
+          </div>
+          <div className="text-xs text-blue-400/80 mt-1">
+            Dispatched to recruiters
+          </div>
         </div>
 
         <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-800/50">
@@ -182,7 +186,7 @@ export default function CommandCenterPage() {
             <Sparkles className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl font-bold text-amber-300 mt-1">
-            {stats?.interview_requested_count ?? "—"}
+            {stats?.interview_requested_count ?? 0}
           </div>
           <div className="text-xs text-amber-400/80 mt-1">
             Awaiting slot approval
@@ -195,7 +199,7 @@ export default function CommandCenterPage() {
             <Calendar className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-2xl font-bold text-cyan-300 mt-1">
-            {stats?.scheduled_count ?? "—"}
+            {stats?.scheduled_count ?? 0}
           </div>
           <div className="text-xs text-cyan-400/80 mt-1">
             Booked on Google Calendar
@@ -225,44 +229,61 @@ export default function CommandCenterPage() {
             </Link>
           </div>
 
-          <div className="divide-y divide-slate-800/70">
-            {recentJobs.map((job) => (
-              <div
-                key={job.job_id}
-                className="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-slate-800/40 transition"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-semibold text-slate-100 text-sm">
-                      {job.company_name}
+          {recentJobs.length === 0 ? (
+            <div className="p-12 text-center space-y-2">
+              <Briefcase className="w-8 h-8 text-slate-500 mx-auto" />
+              <h3 className="text-sm font-semibold text-slate-200">
+                No jobs sourced yet
+              </h3>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Click &quot;Run Sourcing &amp; ATS Gate Batch&quot; above to fetch real jobs and run local ATS match evaluations.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-800/70">
+              {recentJobs.map((job) => (
+                <div
+                  key={job.job_id}
+                  className="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-slate-800/40 transition"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-semibold text-slate-100 text-sm">
+                        {job.company_name}
+                      </span>
+                      <span className="text-slate-400 text-sm">•</span>
+                      <span className="text-slate-300 text-sm truncate">
+                        {job.role_title}
+                      </span>
+                      {job.source_platform && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
+                          {job.source_platform}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-400 truncate mt-0.5">
+                      {job.gap_analysis}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold border ${
+                        job.passed_gate
+                          ? "bg-emerald-950/60 text-emerald-300 border-emerald-700/50"
+                          : "bg-rose-950/60 text-rose-300 border-rose-700/50"
+                      }`}
+                    >
+                      {job.initial_match_score}% Match
                     </span>
-                    <span className="text-slate-400 text-sm">•</span>
-                    <span className="text-slate-300 text-sm truncate">
-                      {job.role_title}
+                    <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                      {job.status}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 truncate mt-0.5">
-                    {job.gap_analysis}
-                  </p>
                 </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <span
-                    className={`px-2.5 py-1 rounded-md text-xs font-bold border ${
-                      job.passed_gate
-                        ? "bg-emerald-950/60 text-emerald-300 border-emerald-700/50"
-                        : "bg-rose-950/60 text-rose-300 border-rose-700/50"
-                    }`}
-                  >
-                    {job.initial_match_score}% Match
-                  </span>
-                  <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
-                    {job.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Live Agent Telemetry Log */}

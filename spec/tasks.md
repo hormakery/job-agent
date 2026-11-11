@@ -7,21 +7,21 @@
 ## Phase 1: Clean Slate, Truthful State & Candidate Profile
 **Goal:** Remove all synthetic dummy/seed records, establish truthful zero-state reporting, and configure the candidate's real profile.
 
-- [ ] **T1.1 — Wipe Synthetic Seed Data & Enforce Truthful Zero-State**
+- [x] **T1.1 — Wipe Synthetic Seed Data & Enforce Truthful Zero-State**
   - Delete dummy records from `data/state_store.json`.
   - Update `GoogleSheetsClient` so that it starts completely empty (`jobs: []`, `emails: []`, `interviews: []`).
   - Verify dashboard displays `0 Jobs Sourced, 0 Applied` when no real jobs exist.
-- [ ] **T1.2 — Candidate Profile Model & Configuration (`config.py` & `.env.example`)**
+- [x] **T1.2 — Candidate Profile Model & Configuration (`config.py` & `.env.example`)**
   - Implement `CandidateProfile` schema: `full_name`, `email`, `phone`, `linkedin_url`, `github_url`, `portfolio_url`, `location`.
   - Add configuration keys to `Settings` and `.env.example`.
   - Expose `GET /api/candidate-profile` and `PUT /api/candidate-profile` endpoints.
-- [ ] **T1.3 — Extend Job Schemas with Sourcing Origin & Application Method**
+- [x] **T1.3 — Extend Job Schemas with Sourcing Origin & Application Method**
   - Update `ExtractedJobListing` and `JobSheetRow` with:
     - `source_platform`: `Literal["LinkedIn", "Indeed", "Glassdoor", "ZipRecruiter", "Direct Career Site"]`.
     - `application_method`: `Literal["email_submission", "portal_submission"]`.
     - `application_email`: Optional direct email for jobs requiring email submission.
     - `date_applied`: Timestamp when application was actually submitted.
-- [ ] **T1.4 — Remove Telegram Dependencies**
+- [x] **T1.4 — Remove Telegram Dependencies**
   - Remove `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, and `telegram_bot.py`.
   - Remove all Telegram alerts from agent flows.
 
