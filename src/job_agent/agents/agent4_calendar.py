@@ -1,7 +1,6 @@
 from job_agent.integrations.calendar_client import GoogleCalendarClient
 from job_agent.integrations.gmail_client import GmailClient
 from job_agent.integrations.sheets_client import GoogleSheetsClient
-from job_agent.integrations.telegram_bot import TelegramHitlNotifier
 from job_agent.models.schemas import EmailClassification, InterviewCoordinationItem
 
 
@@ -9,7 +8,7 @@ class Agent4CalendarCoordinator:
     """
     Agent 4: Interview & Calendar Coordinator (Human-in-the-Loop).
     1. Queries Google Calendar API for open slots.
-    2. Dispatches slot options to both the Next.js Web UI (`/interviews`) and Telegram Bot.
+    2. Dispatches slot options and recruiter booking links to the Next.js Web UI (`/interviews`).
     3. When the user approves a slot & reply draft, books the Google Calendar event,
        updates Google Sheets (`Scheduled` + `Interview Date`), and sends the email via Agent 3.
     """
@@ -17,7 +16,6 @@ class Agent4CalendarCoordinator:
     def __init__(self, sheets_client: GoogleSheetsClient | None = None) -> None:
         self.calendar = GoogleCalendarClient()
         self.gmail = GmailClient()
-        self.telegram = TelegramHitlNotifier()
         self.sheets = sheets_client or GoogleSheetsClient()
 
     def prepare_interview_options(self, email_item: EmailClassification) -> InterviewCoordinationItem:
@@ -42,18 +40,13 @@ class Agent4CalendarCoordinator:
             recruiter_email=email_item.sender_email,
             subject=f"Re: {email_item.subject}",
             email_summary=email_item.summary,
+            scheduling_url=email_item.scheduling_url,
             available_slots=slots,
             selected_slot_id=default_slot.slot_id,
             draft_reply=draft,
             status="pending_selection",
         )
         self.sheets.upsert_interview(coordination)
-        self.telegram.send_slot_selection_alert(
-            company_name=coordination.company_name,
-            role_title=coordination.role_title,
-            slots=slots,
-            job_id=job_id,
-        )
         return coordination
 
     def confirm_slot_and_send_reply(
@@ -96,4 +89,3 @@ class Agent4CalendarCoordinator:
             "email_receipt": email_receipt,
             "updated_job": updated_job.model_dump() if updated_job else None,
         }
-
