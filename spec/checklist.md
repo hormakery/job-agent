@@ -28,9 +28,9 @@
 ---
 
 ## Gate 4: Sourcing Engine & Platform Transparency Quality Gate
-- [ ] **C4.1:** Sourced jobs carry a transparent `source_platform` tag (`LinkedIn`, `Indeed`, `Glassdoor`, `Direct Career Site`).
-- [ ] **C4.2:** Agent 1 accurately detects `application_method` (`email_submission` vs `portal_submission`) from listing text.
-- [ ] **C4.3:** Deterministic `job_id` deduplication prevents duplicate rows from being created.
+- [x] **C4.1:** Sourced jobs carry a transparent `source_platform` tag (`LinkedIn`, `Indeed`, `Glassdoor`, `Direct Career Site`).
+- [x] **C4.2:** Agent 1 accurately detects `application_method` (`email_submission` vs `portal_submission`) from listing text.
+- [x] **C4.3:** Deterministic `job_id` deduplication prevents duplicate rows from being created.
 
 ---
 

@@ -67,13 +67,13 @@
 ## Phase 4: Sourcing Engine & Platform Transparency (Agent 1)
 **Goal:** Transparent job scraping with source tagging and application method detection.
 
-- [ ] **T4.1 — Multi-Platform Ingestion (`jsearch_client.py`)**
-  - Extract and tag source platform (`LinkedIn`, `Indeed`, `Glassdoor`, `Direct`).
-- [ ] **T4.2 — Application Method Detection**
-  - Use `gemini-2.5-flash` to inspect job listing text and determine:
+- [x] **T4.1 — Multi-Platform Ingestion (`jsearch_client.py`)**
+  - Extract and tag source platform (`LinkedIn`, `Indeed`, `Glassdoor`, `ZipRecruiter`, `Direct Career Site`).
+- [x] **T4.2 — Application Method Detection**
+  - Use `gemini-2.5-flash` with deterministic regex fallback to inspect job listing text and determine:
     - `email_submission` (detect recipient email e.g. `jobs@...`, `careers@...`).
     - `portal_submission` (detect application URL e.g. Greenhouse, Lever, Ashby, Workday, LinkedIn Easy Apply).
-- [ ] **T4.3 — Idempotent Deduplication**
+- [x] **T4.3 — Idempotent Deduplication**
   - Deduplicate against live Google Sheets `Job ID` column before passing to Agent 2.
 
 ---
