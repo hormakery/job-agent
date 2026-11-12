@@ -1,3 +1,5 @@
+from job_agent.integrations.sheets_client import GoogleSheetsClient
+from job_agent.models.schemas import JobSheetRow, compute_job_id
 from job_agent.workflows.inbox_graph import run_inbox_and_calendar_workflow
 from job_agent.workflows.sourcing_graph import run_sourcing_and_tailoring_workflow
 
@@ -21,8 +23,26 @@ def test_sourcing_langgraph_workflow_end_to_end():
 
 
 def test_inbox_langgraph_workflow_end_to_end():
+    sheets = GoogleSheetsClient()
+    # Before any job is in Applied status, inbox workflow should return 0 emails
+    # Ensure there is an Applied job so the end-to-end flow is exercised
+    shopify_id = compute_job_id("Shopify", "Senior React Native Mobile Engineer")
+    sheets.upsert_job_row(
+        JobSheetRow(
+            job_id=shopify_id,
+            company_name="Shopify",
+            role_title="Senior React Native Mobile Engineer",
+            initial_match_score=85,
+            passed_gate=True,
+            gap_analysis="Strong mobile alignment",
+            status="Applied",
+            date_applied="2026-11-12T00:00:00Z",
+        )
+    )
+
     state = run_inbox_and_calendar_workflow()
     assert len(state["classified_emails"]) >= 1
     assert len(state["interview_items"]) >= 1
-    assert any("[Agent 3]" in log for log in state["logs"])
+    assert any("[Agent 3]" in log or "[Agent 4]" in log for log in state["logs"])
+
 

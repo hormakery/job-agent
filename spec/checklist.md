@@ -42,6 +42,6 @@
 ---
 
 ## Gate 6: Post-Application Inbox & Calendar HITL Quality Gate
-- [ ] **C6.1:** Agent 4 queries Gmail *strictly for companies that have reached `Applied` status*.
-- [ ] **C6.2:** Recruiter scheduling links (Calendly, Ashby, Greenhouse, Lever) are extracted and displayed alongside conflict-free Google Calendar slots in the Web UI.
-- [ ] **C6.3:** 1-Click calendar booking confirms the event on Google Calendar and updates the Google Sheet with the confirmed interview date.
+- [x] **C6.1:** Agent 4 queries Gmail *strictly for companies that have reached `Applied` status*.
+- [x] **C6.2:** Recruiter scheduling links (Calendly, Ashby, Greenhouse, Lever) are extracted and displayed alongside conflict-free Google Calendar slots in the Web UI.
+- [x] **C6.3:** 1-Click calendar booking confirms the event on Google Calendar and updates the Google Sheet with the confirmed interview date.

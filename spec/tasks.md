@@ -102,15 +102,15 @@
 ## Phase 6: Post-Application Inbox Monitor & Calendar HITL (Agent 4)
 **Goal:** Monitor recruiter replies strictly for submitted jobs and streamline interview scheduling.
 
-- [ ] **T6.1 — Filtered Inbox Monitoring (`src/job_agent/agents/agent4_inbox.py`)**
+- [x] **T6.1 — Filtered Inbox Monitoring (`src/job_agent/agents/agent4_inbox.py`)**
   - Poll Gmail API *strictly for companies matching applications in `Applied` status*.
   - Classify responses into `Application Received`, `Under Review`, `Assessment Request`, `Rejection`, or `Interview Invite`.
-- [ ] **T6.2 — Interview Link & Availability Detection**
+- [x] **T6.2 — Interview Link & Availability Detection**
   - For `Interview Invite`:
     - Detect recruiter scheduling links (Calendly, Ashby, Greenhouse, Lever).
     - If availability is requested, query Google Calendar API `freebusy` for open slots and draft a response.
-- [ ] **T6.3 — Web UI Interview Coordinator & 1-Click Booking (`/interviews`)**
+- [x] **T6.3 — Web UI Interview Coordinator & 1-Click Booking (`/interviews`)**
   - Display recruiter message alongside open calendar slots and booking link.
   - 1-click approval: books Google Calendar event and updates Google Sheets `Interview Date` + `Status = "Scheduled"`.
-- [ ] **T6.4 — End-to-End Workflow Verification**
+- [x] **T6.4 — End-to-End Workflow Verification**
   - Run complete end-to-end test from Sourcing $\rightarrow$ ATS Gate $\rightarrow$ Tailor $\rightarrow$ Dispatch / Apply $\rightarrow$ Inbox Reply $\rightarrow$ Scheduled.
