@@ -178,6 +178,72 @@ export async function fetchApplications(): Promise<ApplicationDispatchItem[]> {
   return res.json();
 }
 
+export async function fetchApplicationByJobId(jobId: string): Promise<ApplicationDispatchItem> {
+  const res = await fetch(`${API_BASE}/api/applications/${jobId}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to load application item");
+  return res.json();
+}
+
+export async function prepareApplication(jobId: string): Promise<ApplicationDispatchItem> {
+  const res = await fetch(`${API_BASE}/api/applications/${jobId}/prepare`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to prepare application package");
+  return res.json();
+}
+
+export async function prepareAllApplications(): Promise<{
+  prepared_count: number;
+  applications: ApplicationDispatchItem[];
+}> {
+  const res = await fetch(`${API_BASE}/api/applications/prepare-all`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to prepare all application packages");
+  return res.json();
+}
+
+export async function createApplicationDraft(
+  jobId: string,
+  customSubject?: string,
+  customBody?: string
+): Promise<Record<string, any>> {
+  const res = await fetch(`${API_BASE}/api/applications/${jobId}/draft`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ custom_subject: customSubject, custom_body: customBody }),
+  });
+  if (!res.ok) throw new Error("Failed to create Gmail draft");
+  return res.json();
+}
+
+export async function sendApplicationEmail(
+  jobId: string,
+  customSubject?: string,
+  customBody?: string,
+  draftId?: string
+): Promise<Record<string, any>> {
+  const res = await fetch(`${API_BASE}/api/applications/${jobId}/send`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      custom_subject: customSubject,
+      custom_body: customBody,
+      draft_id: draftId,
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to send application email");
+  return res.json();
+}
+
+export async function markPortalApplicationApplied(jobId: string): Promise<Record<string, any>> {
+  const res = await fetch(`${API_BASE}/api/applications/${jobId}/mark-applied`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to mark application as applied");
+  return res.json();
+}
+
 export async function fetchGoogleAuthStatus(): Promise<GoogleAuthStatus> {
   const res = await fetch(`${API_BASE}/api/auth/google/status`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to load Google auth status");

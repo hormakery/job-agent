@@ -81,20 +81,20 @@
 ## Phase 5: Application Dispatcher & Submission Engine (Agent 3)
 **Goal:** Bridge the missing gap between tailored resumes and submitted applications.
 
-- [ ] **T5.1 — Direct Email Application Engine (`src/job_agent/agents/agent3_dispatch.py`)**
+- [x] **T5.1 — Direct Email Application Engine (`src/job_agent/agents/agent3_dispatch.py`)**
   - Generate tailored, professional application cover email referencing candidate's matched skills, LinkedIn, portfolio, and contact details.
   - Attach tailored resume PDF.
   * Implement Gmail draft creation via Gmail API (`users().drafts().create`).
   * Implement 1-click "Send Application Email" via Gmail API (`users().messages().send`).
-- [ ] **T5.2 — Portal / Form Application Package Generator**
+- [x] **T5.2 — Portal / Form Application Package Generator**
   - For online portals/forms:
     - Package the direct application URL and 1-click tailored PDF download.
     - Pre-generate STAR-formatted answers for standard screening questions (years of experience, sponsorship, notice period, technical challenges overcome).
-- [ ] **T5.3 — Application Dispatch Hub View in Next.js (`/dispatch`)**
+- [x] **T5.3 — Application Dispatch Hub View in Next.js (`/dispatch`)**
   - Create dedicated view to review application packages:
     - Tab 1: Direct Email Applications (preview draft, edit recipient/subject/body, 1-click Send).
     - Tab 2: Portal / Form Applications (open portal link, download PDF, copy screening answers, 1-click "Mark as Applied").
-- [ ] **T5.4 — Transition to `Applied` Status**
+- [x] **T5.4 — Transition to `Applied` Status**
   - Upon sending email or marking portal submission, record `Date Applied` and transition status to **`Applied`** in Google Sheets.
 
 ---

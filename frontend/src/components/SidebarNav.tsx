@@ -10,12 +10,14 @@ import {
   Settings,
   Sparkles,
   ShieldCheck,
+  SendHorizontal,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Command Center", icon: LayoutDashboard },
   { href: "/jobs", label: "Job Tracker & Gate", icon: Briefcase },
   { href: "/studio", label: "ATS & Tailor Studio", icon: FileCheck2 },
+  { href: "/dispatch", label: "Application Dispatch", icon: SendHorizontal },
   { href: "/interviews", label: "Inbox & Calendar HITL", icon: CalendarClock },
   { href: "/settings", label: "Integrations & Resume", icon: Settings },
 ];

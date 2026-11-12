@@ -40,24 +40,20 @@ export interface CandidateProfile {
 }
 
 export interface ApplicationDispatchItem {
-  application_id: string;
   job_id: string;
   company_name: string;
   role_title: string;
   source_platform: SourcePlatform;
   submission_method: SubmissionMethod;
-  destination_email?: string;
-  portal_url?: string;
-  candidate_email: string;
-  candidate_linkedin: string;
-  candidate_portfolio: string;
-  email_subject?: string;
-  email_body?: string;
-  screening_answers?: Record<string, string>;
-  resume_pdf_path: string;
-  status: "drafted" | "approved" | "sent" | "failed";
-  created_at: string;
-  dispatched_at?: string;
+  recipient_email?: string | null;
+  portal_url?: string | null;
+  cover_subject: string;
+  cover_body: string;
+  tailored_pdf_path: string;
+  tailored_drive_link: string;
+  screening_qa: Record<string, string>;
+  status: "Draft Prepared" | "Dispatched (Sent)" | "Portal Ready";
+  dispatched_at?: string | null;
 }
 
 export interface JobSheetRow {

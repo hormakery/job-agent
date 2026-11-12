@@ -35,9 +35,9 @@
 ---
 
 ## Gate 5: Application Dispatcher & Submission Quality Gate
-- [ ] **C5.1:** For email submissions, Agent 3 generates a professional cover email including the candidate's real LinkedIn URL, portfolio, and contact details, and creates a live draft in Gmail with the tailored PDF attached.
-- [ ] **C5.2:** For portal submissions, Agent 3 packages the direct portal link, PDF download, and AI-generated answers for common application questions.
-- [ ] **C5.3:** No job transitions to `Under Review` or `Interview Requested` without first having an explicit `Applied` status and timestamp recorded.
+- [x] **C5.1:** For email submissions, Agent 3 generates a professional cover email including the candidate's real LinkedIn URL, portfolio, and contact details, and creates a live draft in Gmail with the tailored PDF attached.
+- [x] **C5.2:** For portal submissions, Agent 3 packages the direct portal link, PDF download, and AI-generated answers for common application questions.
+- [x] **C5.3:** No job transitions to `Under Review` or `Interview Requested` without first having an explicit `Applied` status and timestamp recorded.
 
 ---
 
