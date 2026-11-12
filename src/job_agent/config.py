@@ -39,7 +39,8 @@ class Settings(BaseSettings):
     ats_cli_command: str = ""
     ats_match_threshold: int = 50
 
-    # 5. Google Workspace Settings (OAuth2 + Sheets/Drive)
+    # 5. Google Workspace Settings (OAuth2 + App Password + Sheets/Drive)
+    google_app_password: str = ""
     google_client_id: str = ""
     google_client_secret: str = ""
     google_service_account_file: str = str(PROJECT_ROOT / "credentials" / "service_account.json")
