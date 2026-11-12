@@ -71,6 +71,7 @@ function SettingsContent() {
   const [clientIdInput, setClientIdInput] = useState("");
   const [clientSecretInput, setClientSecretInput] = useState("");
   const [savingCreds, setSavingCreds] = useState(false);
+  const [showOAuthHelp, setShowOAuthHelp] = useState(false);
 
   async function loadGoogleStatus() {
     try {
@@ -349,31 +350,74 @@ function SettingsContent() {
 
             <div className="flex flex-wrap items-center gap-3">
               {googleStatus?.has_client_secret ? (
-                <Button
-                  variant="primary"
-                  onClick={handleConnectGoogle}
-                  isLoading={loadingGoogle}
-                  className="shadow-lg shadow-cyan-500/20"
-                >
-                  <ExternalLink className="w-4 h-4 mr-1.5" />
-                  Connect Google Workspace via OAuth2
-                </Button>
+                <>
+                  <Button
+                    variant="primary"
+                    onClick={handleConnectGoogle}
+                    isLoading={loadingGoogle}
+                    className="shadow-lg shadow-cyan-500/20"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-1.5" />
+                    Connect Google Workspace via OAuth2
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowOAuthHelp(!showOAuthHelp)}
+                  >
+                    <AlertCircle className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+                    {showOAuthHelp ? "Hide Access Denied Guide" : "Getting 'Access Denied'? Read Fix"}
+                  </Button>
+                </>
               ) : (
                 <div className="space-y-3 w-full">
                   <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
                     <strong>OAuth Client Credentials Needed:</strong> Provide your Google Cloud OAuth Client ID and Secret to enable one-click login, or add them to your <code className="text-amber-200 font-mono">.env</code> file.
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCredsForm(!showCredsForm)}
-                  >
-                    <Key className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
-                    {showCredsForm ? "Hide Credentials Form" : "Enter Google Client ID & Secret"}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCredsForm(!showCredsForm)}
+                    >
+                      <Key className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+                      {showCredsForm ? "Hide Credentials Form" : "Enter Google Client ID & Secret"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowOAuthHelp(!showOAuthHelp)}
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+                      {showOAuthHelp ? "Hide Guide" : "How to Set Up in Google Cloud"}
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
+
+            {/* Google Cloud Access Denied & Setup Walkthrough */}
+            {showOAuthHelp && (
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-3 text-xs text-amber-200/90 animate-in fade-in duration-200">
+                <div className="font-bold text-amber-300 flex items-center gap-1.5 text-sm">
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  Why Google Cloud Shows "Access Denied" (Error 403) &amp; How to Fix It:
+                </div>
+                <p className="leading-relaxed">
+                  In Google Cloud Console, any new app defaults to <strong>"Publishing Status: Testing"</strong>. While in testing mode, Google automatically blocks any email address that has not been explicitly added as a <strong>Test User</strong>.
+                </p>
+                <div className="space-y-2 p-3 rounded-lg bg-slate-950/80 border border-amber-500/20 font-mono text-[11px] text-slate-300">
+                  <div className="font-semibold text-amber-300 font-sans text-xs">3-Step Fix in Google Cloud Console:</div>
+                  <div>1. Go to <strong>Google Cloud Console &rarr; APIs &amp; Services &rarr; OAuth consent screen</strong>.</div>
+                  <div>2. Scroll to <strong>Test users</strong> &rarr; click <strong>+ ADD USERS</strong> &rarr; enter your exact Gmail address.</div>
+                  <div>3. Under <strong>Credentials &rarr; Authorized redirect URIs</strong>, ensure <code className="text-cyan-400">http://localhost:3001/settings</code> is listed.</div>
+                </div>
+                <p className="text-[11px] text-amber-300/80">
+                  Once your email is added under Test Users, clicking "Connect Google Workspace via OAuth2" will immediately allow sign-in.
+                </p>
+              </div>
+            )}
 
             {/* Manual Client Credentials Form */}
             {showCredsForm && (

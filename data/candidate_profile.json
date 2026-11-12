@@ -1,10 +1,15 @@
 {
-  "full_name": "Alex Mercer",
+  "full_name": "Blessing Ukwu",
   "email": "alex.mercer@example.com",
   "phone": "+1 (555) 019-2834",
-  "linkedin_url": "https://linkedin.com/in/alexmercer",
-  "github_url": "https://github.com/alexmercer",
-  "portfolio_url": "https://alexmercer.dev",
-  "location": "San Francisco, CA (Open to Remote)"
+  "linkedin_url": "https://www.linkedin.com/in/ukwu-blessing/",
+  "github_url": "https://github.com/hormakery",
+  "portfolio_url": "https://blessing-ukwu.netlify.app/",
+  "location": "Open to Remote / Hybrid",
+  "target_roles": [
+    "Full Stack Engineer",
+    "Frontend Engineer",
+    "Software Engineer",
+    "DevOps Engineer"
+  ]
 }
-

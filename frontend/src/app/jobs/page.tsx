@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { API_BASE, fetchJobs, tailorJobResume, updateJobStatus } from "@/lib/api";
 import { ApplicationStatus, JobSheetRow } from "@/lib/types";
 import { Badge, Button, Card, ScoreRing, useToast } from "@/components/ui";
+import { JobDescriptionBreakdown } from "@/components/JobDescriptionBreakdown";
 import {
   Search,
   ExternalLink,
@@ -439,209 +440,16 @@ export default function JobTrackerPage() {
         </div>
       )}
 
-      {/* Slide-Over Job Inspector Drawer */}
+      {/* Slide-Over Job Inspector Drawer with Structured Description Breakdown */}
       {selectedJob && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-slate-900 border-l border-slate-800 shadow-2xl h-full flex flex-col animate-in slide-in-from-right duration-250">
-            {/* Drawer Header */}
-            <div className="p-5 border-b border-slate-800 flex items-start justify-between bg-slate-950/40">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant={selectedJob.passed_gate ? "emerald" : "rose"}
-                    size="sm"
-                    withDot
-                  >
-                    {selectedJob.passed_gate ? "Passed Gate (\u226550%)" : "Skipped (<50%)"}
-                  </Badge>
-                  <span className="text-xs text-slate-400 font-mono">
-                    ID: {selectedJob.job_id}
-                  </span>
-                </div>
-                <h2 className="text-lg font-bold text-white mt-1">
-                  {selectedJob.company_name} — {selectedJob.role_title}
-                </h2>
-                <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                  <span>{selectedJob.location}</span>
-                  <span>•</span>
-                  <span>{selectedJob.source_platform}</span>
-                  <span>•</span>
-                  <span>{selectedJob.submission_method}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedJob(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Drawer Tabs */}
-            <div className="flex items-center gap-2 px-5 border-b border-slate-800 bg-slate-950/20">
-              <button
-                onClick={() => setActiveDrawerTab("ats")}
-                className={`py-3 text-xs font-semibold border-b-2 transition ${
-                  activeDrawerTab === "ats"
-                    ? "border-indigo-500 text-indigo-400"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                ATS Match &amp; Gaps ({selectedJob.initial_match_score}%)
-              </button>
-              <button
-                onClick={() => setActiveDrawerTab("resume")}
-                className={`py-3 text-xs font-semibold border-b-2 transition ${
-                  activeDrawerTab === "resume"
-                    ? "border-indigo-500 text-indigo-400"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                Tailored Resume (STAR)
-              </button>
-              <button
-                onClick={() => setActiveDrawerTab("metadata")}
-                className={`py-3 text-xs font-semibold border-b-2 transition ${
-                  activeDrawerTab === "metadata"
-                    ? "border-indigo-500 text-indigo-400"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                Listing &amp; Raw Description
-              </button>
-            </div>
-
-            {/* Drawer Content */}
-            <div className="p-5 flex-1 overflow-y-auto space-y-4">
-              {activeDrawerTab === "ats" && (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-semibold text-slate-400">
-                        Local ATS Checker Match Score
-                      </div>
-                      <div className="text-2xl font-black text-white mt-0.5">
-                        {selectedJob.initial_match_score}%
-                      </div>
-                      <div className="text-xs text-slate-400 mt-1">
-                        {selectedJob.gap_analysis}
-                      </div>
-                    </div>
-                    <ScoreRing score={selectedJob.initial_match_score} size="lg" />
-                  </div>
-
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                      Matched Core Competencies:
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedJob.matched_skills.length > 0 ? (
-                        selectedJob.matched_skills.map((sk) => (
-                          <Badge key={sk} variant="emerald" size="sm">
-                            ✓ {sk}
-                          </Badge>
-                        ))
-                      ) : (
-                        <span className="text-xs text-slate-500 italic">None detected</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                      Missing Critical Skills:
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedJob.missing_critical_skills.length > 0 ? (
-                        selectedJob.missing_critical_skills.map((sk) => (
-                          <Badge key={sk} variant="rose" size="sm">
-                            ✗ {sk}
-                          </Badge>
-                        ))
-                      ) : (
-                        <span className="text-xs text-slate-500 italic">No critical missing skills</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeDrawerTab === "resume" && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-400">
-                      Grounded strictly in Master Resume (STAR method)
-                    </span>
-                    <a
-                      href={`${API_BASE}/api/resumes/${selectedJob.job_id}/pdf`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md transition"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Download PDF
-                    </a>
-                  </div>
-
-                  {selectedJob.tailored_markdown ? (
-                    <pre className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-slate-200 whitespace-pre-wrap leading-relaxed max-h-[420px] overflow-y-auto">
-                      {selectedJob.tailored_markdown}
-                    </pre>
-                  ) : (
-                    <div className="p-8 text-center rounded-xl bg-slate-950 border border-slate-800">
-                      <p className="text-xs text-rose-400">
-                        Tailoring skipped because match score ({selectedJob.initial_match_score}%) was below the 50% cutoff gate.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {activeDrawerTab === "metadata" && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Origin URL:</span>
-                    {selectedJob.job_url ? (
-                      <a
-                        href={selectedJob.job_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-indigo-400 hover:text-indigo-300 font-mono inline-flex items-center gap-1"
-                      >
-                        {selectedJob.job_url.slice(0, 45)}... <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ) : (
-                      <span className="text-slate-500">N/A</span>
-                    )}
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 whitespace-pre-wrap leading-relaxed max-h-[380px] overflow-y-auto font-sans">
-                    {selectedJob.raw_description || "No description available"}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Drawer Footer Actions */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedJob(null)}
-              >
-                Close
-              </Button>
-
-              <Button
-                variant="primary"
-                size="sm"
-                loading={tailoringId === selectedJob.job_id}
-                onClick={() => handleReTailor(selectedJob.job_id)}
-              >
-                Re-Tailor Resume (Gemini 2.5 Pro)
-              </Button>
-            </div>
+        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl bg-[#080c14] border-l border-white/[0.08] shadow-2xl h-full flex flex-col animate-in slide-in-from-right duration-250 overflow-hidden">
+            <JobDescriptionBreakdown
+              job={selectedJob}
+              onClose={() => setSelectedJob(null)}
+              onReTailor={() => handleReTailor(selectedJob.job_id)}
+              isTailoring={tailoringId === selectedJob.job_id}
+            />
           </div>
         </div>
       )}

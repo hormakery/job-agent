@@ -81,3 +81,4 @@ export function ScoreRing({ score, size = "md", showLabel = false }: ScoreRingPr
     </div>
   );
 }
+
