@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
   fetchDashboardStats,
@@ -9,6 +9,7 @@ import {
   syncInboxWorkflow,
 } from "@/lib/api";
 import { DashboardStats, JobSheetRow } from "@/lib/types";
+import { Button, Card, Badge, ScoreRing, useToast } from "@/components/ui";
 import {
   Play,
   RefreshCw,
@@ -21,17 +22,28 @@ import {
   Sparkles,
   Send,
   Briefcase,
+  Copy,
+  Trash2,
+  ChevronRight,
+  ShieldCheck,
+  Globe,
+  MailCheck,
+  Flame,
 } from "lucide-react";
 
 export default function CommandCenterPage() {
+  const { showToast } = useToast();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentJobs, setRecentJobs] = useState<JobSheetRow[]>([]);
   const [logs, setLogs] = useState<string[]>([
-    "[System] LangGraph 4-Agent Orchestrator ready.",
-    "[Agent 2] Local ATS Checker bridge connected (Threshold gate >= 50%).",
+    "[System] LangGraph 4-Agent Autonomous Orchestrator initialized.",
+    "[Agent 2] Local ATS-Checker Gatekeeper active (strict >=50% cutoff).",
+    "[Agent 3] Application Dispatch Engine ready (Direct Email & Portal Packages).",
+    "[Agent 4] Post-Application Inbox & Calendar HITL initialized.",
   ]);
   const [runningSource, setRunningSource] = useState(false);
   const [runningInbox, setRunningInbox] = useState(false);
+  const terminalEndRef = useRef<HTMLDivElement>(null);
 
   async function loadData() {
     try {
@@ -47,11 +59,17 @@ export default function CommandCenterPage() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (terminalEndRef.current) {
+      terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [logs]);
+
   async function handleRunSourcing() {
     setRunningSource(true);
     setLogs((prev) => [
       ...prev,
-      "[Orchestrator] Starting Workflow A: Agent 1 (JSearch Scraper) -> Agent 2 (Local ATS Gate >=50% & Gemini 2.5 Pro Tailor)...",
+      `[${new Date().toLocaleTimeString()}] [Orchestrator] Starting Workflow A: Agent 1 (Multi-Platform Sourcing) -> Agent 2 (ATS Gatekeeper & Gemini 2.5 Pro Tailoring)...`,
     ]);
     try {
       const res = await runSourcingWorkflow({
@@ -67,8 +85,10 @@ export default function CommandCenterPage() {
       });
       setLogs((prev) => [...prev, ...res.logs]);
       await loadData();
+      showToast(`Sourcing complete! Processed ${res.processed_count} listings.`, "success");
     } catch (e: any) {
       setLogs((prev) => [...prev, `[Error] ${e.message}`]);
+      showToast(e.message || "Sourcing workflow failed", "error");
     } finally {
       setRunningSource(false);
     }
@@ -78,207 +98,269 @@ export default function CommandCenterPage() {
     setRunningInbox(true);
     setLogs((prev) => [
       ...prev,
-      "[Orchestrator] Starting Workflow B: Agent 3 (Gmail Classifier) -> Agent 4 (Google Calendar + HITL)...",
+      `[${new Date().toLocaleTimeString()}] [Orchestrator] Starting Workflow B: Agent 4 (Strict Applied Inbox Scanner) -> Calendar HITL Coordinator...`,
     ]);
     try {
       const res = await syncInboxWorkflow();
       setLogs((prev) => [...prev, ...res.logs]);
       await loadData();
+      showToast(`Inbox synced! Classified ${res.emails.length} threads.`, "info");
     } catch (e: any) {
       setLogs((prev) => [...prev, `[Error] ${e.message}`]);
+      showToast(e.message || "Inbox sync failed", "error");
     } finally {
       setRunningInbox(false);
     }
   }
 
+  function copyLogs() {
+    navigator.clipboard.writeText(logs.join("\n"));
+    showToast("Terminal logs copied to clipboard!", "info");
+  }
+
+  function clearLogs() {
+    setLogs(["[System] Logs cleared."]);
+  }
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header & Action Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      {/* Hero Action Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 border-b border-slate-800/80 pb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Autonomous Job Application Command Center
+          <div className="flex items-center gap-2 mb-1.5">
+            <Badge variant="indigo" size="sm" withDot>
+              Autonomous Multi-Agent System
+            </Badge>
+            <span className="text-xs text-slate-500 font-mono">
+              Next.js 15 • Gemini 2.5 • LangGraph
+            </span>
+          </div>
+          <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white">
+            Command Center
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Coordinating Agent 1 (Scraper), Agent 2 (Local ATS &ge;50% Gate &amp; Tailor), Agent 3 (Gmail Monitor), and Agent 4 (Calendar HITL)
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+            Autonomous job pipeline coordinating Sourcing (Agent 1), ATS Gatekeeper (Agent 2), Application Dispatcher (Agent 3), and Calendar Coordinator (Agent 4).
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <Button
+            variant="primary"
+            size="md"
+            loading={runningSource}
+            icon={<Play className="w-3.5 h-3.5" />}
             onClick={handleRunSourcing}
-            disabled={runningSource}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium transition shadow-lg shadow-indigo-600/20 cursor-pointer"
           >
-            <Play className="w-4 h-4" />
-            {runningSource
-              ? "Running Agent 1 & 2..."
-              : "Run Sourcing & ATS Gate Batch"}
-          </button>
+            {runningSource ? "Running Sourcing & Tailoring..." : "Run Sourcing & Tailor Batch"}
+          </Button>
 
-          <button
+          <Button
+            variant="secondary"
+            size="md"
+            loading={runningInbox}
+            icon={<RefreshCw className={`w-3.5 h-3.5 ${runningInbox ? "animate-spin" : ""}`} />}
             onClick={handleSyncInbox}
-            disabled={runningInbox}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-100 text-sm font-medium border border-slate-700 transition cursor-pointer"
           >
-            <RefreshCw
-              className={`w-4 h-4 ${runningInbox ? "animate-spin" : ""}`}
-            />
-            {runningInbox ? "Scanning Gmail..." : "Sync Inbox (Agent 3 & 4)"}
-          </button>
+            {runningInbox ? "Scanning Inbox..." : "Sync Recruiter Inbox"}
+          </Button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-          <div className="text-xs text-slate-400 font-medium">Total Sourced</div>
-          <div className="text-2xl font-bold text-white mt-1">
+      {/* 4-Stage Pipeline Flow Visualizer */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Stage 1: Sourcing */}
+        <div className="glass-panel-interactive p-4 rounded-2xl relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center justify-center text-xs font-bold font-mono">
+                1
+              </span>
+              <span className="text-xs font-bold text-slate-200">Sourcing Engine</span>
+            </div>
+            <Badge variant="sky" size="sm">
+              Agent 1
+            </Badge>
+          </div>
+          <div className="text-2xl font-black text-white tabular-nums tracking-tight">
             {stats?.total_jobs_sourced ?? 0}
           </div>
-          <div className="text-xs text-slate-400 mt-1">
-            Avg Score: {stats?.average_match_score ?? 0}%
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>Multi-platform ingestion</span>
+            <span className="font-mono text-sky-400">LinkedIn/Indeed</span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <Link href="/jobs" className="text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1">
+              View Jobs <ChevronRight className="w-3 h-3" />
+            </Link>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-800/50">
-          <div className="flex items-center justify-between text-xs text-emerald-300 font-medium">
-            <span>Passed Gate (&ge;50%)</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        {/* Stage 2: ATS Gate & Tailor */}
+        <div className="glass-panel-interactive p-4 rounded-2xl relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs font-bold font-mono">
+                2
+              </span>
+              <span className="text-xs font-bold text-slate-200">ATS Gate & Tailor</span>
+            </div>
+            <Badge variant="emerald" size="sm">
+              Agent 2
+            </Badge>
           </div>
-          <div className="text-2xl font-bold text-emerald-300 mt-1">
+          <div className="text-2xl font-black text-emerald-300 tabular-nums tracking-tight">
             {stats?.passed_gate_count ?? 0}
           </div>
-          <div className="text-xs text-emerald-400/80 mt-1">
-            Tailored via Gemini 2.5 Pro
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>Passed &ge;50% Cutoff</span>
+            <span className="font-mono text-emerald-400">Gemini 2.5 Pro</span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <Link href="/studio" className="text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1">
+              ATS Studio <ChevronRight className="w-3 h-3" />
+            </Link>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-          <div className="flex items-center justify-between text-xs text-indigo-300 font-medium">
-            <span>Tailored &amp; Ready</span>
-            <FileText className="w-4 h-4 text-indigo-400" />
+        {/* Stage 3: Dispatch & Apply */}
+        <div className="glass-panel-interactive p-4 rounded-2xl relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xs font-bold font-mono">
+                3
+              </span>
+              <span className="text-xs font-bold text-slate-200">Application Dispatch</span>
+            </div>
+            <Badge variant="indigo" size="sm">
+              Agent 3
+            </Badge>
           </div>
-          <div className="text-2xl font-bold text-white mt-1">
-            {stats?.tailored_ready_count ?? 0}
-          </div>
-          <div className="text-xs text-slate-400 mt-1">
-            Drafted: {stats?.application_drafted_count ?? 0}
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-blue-950/30 border border-blue-800/50">
-          <div className="flex items-center justify-between text-xs text-blue-300 font-medium">
-            <span>Applications Sent</span>
-            <Send className="w-4 h-4 text-blue-400" />
-          </div>
-          <div className="text-2xl font-bold text-blue-300 mt-1">
+          <div className="text-2xl font-black text-indigo-300 tabular-nums tracking-tight">
             {stats?.applied_count ?? 0}
           </div>
-          <div className="text-xs text-blue-400/80 mt-1">
-            Dispatched to recruiters
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>Verified Applied</span>
+            <span className="font-mono text-indigo-400">Gmail & Portals</span>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <Link href="/dispatch" className="text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1">
+              Dispatch Hub <ChevronRight className="w-3 h-3" />
+            </Link>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-800/50">
-          <div className="flex items-center justify-between text-xs text-amber-300 font-medium">
-            <span>Interview Invites</span>
-            <Sparkles className="w-4 h-4 text-amber-400" />
+        {/* Stage 4: Interview & Scheduling */}
+        <div className="glass-panel-interactive p-4 rounded-2xl relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center text-xs font-bold font-mono">
+                4
+              </span>
+              <span className="text-xs font-bold text-slate-200">Interview HITL</span>
+            </div>
+            <Badge variant="amber" size="sm">
+              Agent 4
+            </Badge>
           </div>
-          <div className="text-2xl font-bold text-amber-300 mt-1">
+          <div className="text-2xl font-black text-amber-300 tabular-nums tracking-tight">
             {stats?.interview_requested_count ?? 0}
           </div>
-          <div className="text-xs text-amber-400/80 mt-1">
-            Awaiting slot approval
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>Scheduled: {stats?.scheduled_count ?? 0}</span>
+            <span className="font-mono text-amber-400">Google Calendar</span>
           </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-cyan-950/30 border border-cyan-800/50">
-          <div className="flex items-center justify-between text-xs text-cyan-300 font-medium">
-            <span>Scheduled</span>
-            <Calendar className="w-4 h-4 text-cyan-400" />
-          </div>
-          <div className="text-2xl font-bold text-cyan-300 mt-1">
-            {stats?.scheduled_count ?? 0}
-          </div>
-          <div className="text-xs text-cyan-400/80 mt-1">
-            Booked on Google Calendar
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <Link href="/interviews" className="text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1">
+              Coordinator <ChevronRight className="w-3 h-3" />
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Live Agent Execution Console + Recent Gate Decisions */}
+      {/* Main Grid: State Feed & Execution Console */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Gatekeeper Decisions */}
-        <div className="lg:col-span-2 rounded-xl bg-slate-900/90 border border-slate-800 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+        {/* State Feed (Recent Decisions) */}
+        <div className="lg:col-span-2 glass-panel rounded-2xl overflow-hidden flex flex-col">
+          <div className="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between">
             <div>
-              <h2 className="font-semibold text-white text-base">
-                Google Sheets State Feed (Recent Gate Decisions)
+              <h2 className="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                <span>Relational State Feed</span>
+                <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                  Recent Decisions
+                </span>
               </h2>
-              <p className="text-xs text-slate-400">
-                Live state tracked across Agent 1, Agent 2, Agent 3, and Agent 4
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Real-time tracking synchronized across ATS Gate, Tailored Resumes, and Google Sheets
               </p>
             </div>
             <Link
               href="/jobs"
-              className="text-xs text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1 font-medium"
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1 transition"
             >
-              <span>Open Full Job Tracker</span>
+              <span>View All</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {recentJobs.length === 0 ? (
-            <div className="p-12 text-center space-y-2">
-              <Briefcase className="w-8 h-8 text-slate-500 mx-auto" />
-              <h3 className="text-sm font-semibold text-slate-200">
-                No jobs sourced yet
-              </h3>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Click &quot;Run Sourcing &amp; ATS Gate Batch&quot; above to fetch real jobs and run local ATS match evaluations.
-              </p>
+            <div className="p-12 text-center space-y-3 flex-1 flex flex-col items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500">
+                <Briefcase className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-200">
+                  No applications in state store yet
+                </h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                  Start with a clean slate. Click &quot;Run Sourcing &amp; Tailor Batch&quot; to fetch realistic job listings and evaluate ATS match scores.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="divide-y divide-slate-800/70">
+            <div className="divide-y divide-slate-800/60 flex-1 overflow-y-auto max-h-[460px]">
               {recentJobs.map((job) => (
                 <div
                   key={job.job_id}
-                  className="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-slate-800/40 transition"
+                  className="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-slate-800/30 transition group"
                 >
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2.5">
-                      <span className="font-semibold text-slate-100 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-100 text-sm group-hover:text-indigo-300 transition">
                         {job.company_name}
                       </span>
-                      <span className="text-slate-400 text-sm">•</span>
-                      <span className="text-slate-300 text-sm truncate">
+                      <span className="text-slate-600 text-xs">•</span>
+                      <span className="text-slate-300 text-xs truncate font-medium">
                         {job.role_title}
                       </span>
                       {job.source_platform && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 font-mono">
                           {job.source_platform}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 truncate mt-0.5">
-                      {job.gap_analysis}
+                    <p className="text-[11px] text-slate-400 truncate mt-1">
+                      {job.gap_analysis || "Evaluated by local ATS Checker"}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <span
-                      className={`px-2.5 py-1 rounded-md text-xs font-bold border ${
-                        job.passed_gate
-                          ? "bg-emerald-950/60 text-emerald-300 border-emerald-700/50"
-                          : "bg-rose-950/60 text-rose-300 border-rose-700/50"
-                      }`}
+                    <ScoreRing score={job.initial_match_score} size="sm" />
+                    <Badge
+                      variant={
+                        job.status === "Scheduled"
+                          ? "cyan"
+                          : job.status === "Interview Requested"
+                          ? "amber"
+                          : job.status === "Applied"
+                          ? "emerald"
+                          : job.status === "Tailored & Ready"
+                          ? "indigo"
+                          : "slate"
+                      }
+                      size="sm"
                     >
-                      {job.initial_match_score}% Match
-                    </span>
-                    <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
                       {job.status}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               ))}
@@ -286,35 +368,54 @@ export default function CommandCenterPage() {
           )}
         </div>
 
-        {/* Live Agent Telemetry Log */}
-        <div className="rounded-xl bg-slate-950 border border-slate-800 flex flex-col h-[420px]">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-              LangGraph Agent Execution Console
-            </span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto font-mono text-xs space-y-2 text-slate-300">
-            {logs.map((line, i) => (
-              <div
-                key={i}
-                className={`leading-relaxed ${
-                  line.includes("PASSED GATE")
-                    ? "text-emerald-400"
-                    : line.includes("SKIPPED")
-                    ? "text-rose-400"
-                    : line.includes("[Error]")
-                    ? "text-red-400"
-                    : "text-slate-300"
-                }`}
+        {/* Live LangGraph Execution Console */}
+        <div className="glass-panel rounded-2xl flex flex-col h-[520px] overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/60">
+            <div className="flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                Agent Telemetry Console
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={copyLogs}
+                title="Copy logs"
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
               >
-                {line}
-              </div>
-            ))}
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={clearLogs}
+                title="Clear logs"
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 flex-1 overflow-y-auto font-mono text-[11px] space-y-2 text-slate-300 bg-slate-950/80 select-text leading-relaxed">
+            {logs.map((line, i) => {
+              let color = "text-slate-300";
+              if (line.includes("[Agent 1]")) color = "text-sky-300";
+              else if (line.includes("[Agent 2]")) color = "text-indigo-300";
+              else if (line.includes("[Agent 3]")) color = "text-purple-300";
+              else if (line.includes("[Agent 4]")) color = "text-amber-300";
+              else if (line.includes("PASSED GATE")) color = "text-emerald-400 font-bold";
+              else if (line.includes("SKIPPED")) color = "text-rose-400";
+              else if (line.includes("[Error]")) color = "text-red-400 font-bold";
+
+              return (
+                <div key={i} className={`break-words ${color}`}>
+                  {line}
+                </div>
+              );
+            })}
+            <div ref={terminalEndRef} />
           </div>
         </div>
       </div>
     </div>
   );
 }
-

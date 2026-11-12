@@ -1,9 +1,21 @@
 import React from "react";
 
+export type BadgeVariant =
+  | "emerald"
+  | "amber"
+  | "rose"
+  | "indigo"
+  | "sky"
+  | "purple"
+  | "slate"
+  | "cyan"
+  | "neutral";
+
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "emerald" | "amber" | "rose" | "indigo" | "sky" | "purple" | "slate" | "cyan";
+  variant?: BadgeVariant;
   size?: "sm" | "md";
   withDot?: boolean;
+  pulse?: boolean;
 }
 
 export function Badge({
@@ -12,12 +24,15 @@ export function Badge({
   variant = "slate",
   size = "md",
   withDot = false,
+  pulse = false,
   ...props
 }: BadgeProps) {
   const sizeStyles = {
     sm: "text-[10px] px-2 py-0.5 gap-1",
     md: "text-xs px-2.5 py-0.5 gap-1.5",
   }[size];
+
+  const effectiveVariant = variant === "neutral" ? "slate" : variant;
 
   const variantStyles = {
     emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/25",
@@ -28,7 +43,7 @@ export function Badge({
     purple: "bg-purple-500/10 text-purple-300 border-purple-500/25",
     cyan: "bg-cyan-500/10 text-cyan-300 border-cyan-500/25",
     slate: "bg-slate-800/80 text-slate-300 border-slate-700/60",
-  }[variant];
+  }[effectiveVariant];
 
   const dotColors = {
     emerald: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]",
@@ -39,17 +54,19 @@ export function Badge({
     purple: "bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.6)]",
     cyan: "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]",
     slate: "bg-slate-400",
-  }[variant];
+  }[effectiveVariant];
+
+  const showDot = withDot || pulse;
 
   return (
     <span
       className={`inline-flex items-center font-medium rounded-full border shadow-sm ${sizeStyles} ${variantStyles} ${className}`}
       {...props}
     >
-      {withDot && (
+      {showDot && (
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 animate-pulse ${dotColors}`} />
       )}
-      <span>{children}</span>
+      {children}
     </span>
   );
 }

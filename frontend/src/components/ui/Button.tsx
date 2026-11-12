@@ -5,6 +5,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger" | "success";
   size?: "xs" | "sm" | "md" | "lg";
   loading?: boolean;
+  isLoading?: boolean;
   icon?: React.ReactNode;
 }
 
@@ -16,12 +17,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "primary",
       size = "md",
       loading = false,
+      isLoading = false,
       disabled = false,
       icon,
       ...props
     },
     ref
   ) => {
+    const isBusy = loading || isLoading;
+
     const baseStyles =
       "inline-flex items-center justify-center font-medium transition-all duration-150 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]";
 
@@ -50,16 +54,16 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        disabled={disabled || loading}
+        disabled={disabled || isBusy}
         className={`${baseStyles} ${sizeStyles} ${variantStyles} ${className}`}
         {...props}
       >
-        {loading ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+        {isBusy ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
         ) : (
           icon && <span className="shrink-0">{icon}</span>
         )}
-        <span>{children}</span>
+        {children}
       </button>
     );
   }

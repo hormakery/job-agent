@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SidebarNav } from "@/components/SidebarNav";
+import { TopBar } from "@/components/TopBar";
 import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
@@ -19,7 +20,8 @@ export default function RootLayout({
       <body className="min-h-screen flex text-slate-100 antialiased font-sans">
         <ToastProvider>
           <SidebarNav />
-          <main className="flex-1 min-w-0 overflow-y-auto p-6 lg:p-8">
+          <main className="flex-1 min-w-0 overflow-y-auto px-6 pb-8 lg:px-8">
+            <TopBar />
             {children}
           </main>
         </ToastProvider>

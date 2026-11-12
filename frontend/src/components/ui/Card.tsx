@@ -1,7 +1,9 @@
 import React from "react";
 
+export type CardVariant = "default" | "interactive" | "subtle" | "glass";
+
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "interactive" | "subtle";
+  variant?: CardVariant;
   topHighlight?: boolean;
 }
 
@@ -12,11 +14,13 @@ export function Card({
   topHighlight = true,
   ...props
 }: CardProps) {
+  const effectiveVariant = variant === "glass" ? "default" : variant;
+
   const variantStyles = {
     default: "glass-panel",
     interactive: "glass-panel-interactive cursor-pointer",
     subtle: "glass-subtle",
-  }[variant];
+  }[effectiveVariant];
 
   return (
     <div

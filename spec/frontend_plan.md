@@ -56,58 +56,58 @@ The current UI was built strictly to satisfy functional spec contracts, leaving 
     - `Toast.tsx`: Lightweight toast notification provider and `useToast` hook for smooth user feedback.
 
 ### Phase 2: App Shell, Top Bar & Navigation
-- [ ] **T-F2.1: Modern Sidebar (`SidebarNav.tsx`)**
+- [x] **T-F2.1: Modern Sidebar (`SidebarNav.tsx`)**
   - Brand header with animated gradient logo and version tag.
   - Active nav pills with left accent border and soft indigo glow.
-  - Connected services status pill at the bottom (Google OAuth status + ATS Checker ping).
-- [ ] **T-F2.2: Global Top Navigation Header**
-  - Add breadcrumb navigation, active page title, quick-action buttons, and live system health pills (FastAPI: Online, ATS: Connected, Google: Authenticated).
+  - Connected services status pill at the bottom with gatekeeper active indicator.
+- [x] **T-F2.2: Global Top Navigation Header (`TopBar.tsx`)**
+  - Added breadcrumb navigation, active page title, and live system health pills (FastAPI: 8080 Active, ATS: Connected, Google: Authenticated).
 
 ### Phase 3: Command Center (`/`) Overhaul
-- [ ] **T-F3.1: 4-Stage Pipeline Flow Visualizer**
+- [x] **T-F3.1: 4-Stage Pipeline Flow Visualizer**
   - Horizontal interactive pipeline stepper:
     `Sourcing (Agent 1) ──> ATS Gate (Agent 2) ──> Dispatch (Agent 3) ──> Coordination (Agent 4)`
     Showing live counts and drop-off percentages at each stage.
-- [ ] **T-F3.2: Redesigned KPI Metrics Grid**
+- [x] **T-F3.2: Redesigned KPI Metrics Grid**
   - Compact, beautifully spaced stat cards with trend sparklines and clean contrast.
-- [ ] **T-F3.3: Interactive Terminal Console**
+- [x] **T-F3.3: Interactive Terminal Console**
   - Polished dark terminal with agent-colored prefixes (`[Agent 1: cyan]`, `[Agent 2: indigo]`, `[Agent 3: sky]`, `[Agent 4: amber]`), copy logs button, and auto-scroll.
 
 ### Phase 4: Job Tracker & Kanban Board (`/jobs`)
-- [ ] **T-F4.1: View Toggle (Data Table vs Kanban Board)**
+- [x] **T-F4.1: View Toggle (Data Table vs Kanban Board)**
   - Smooth animated segmented control switching between Table and Kanban views.
-- [ ] **T-F4.2: Modernized Data Table**
+- [x] **T-F4.2: Modernized Data Table**
   - Rounded row cards with hover highlights, company logo initials, origin platform tags (`LinkedIn`, `Indeed`, `Glassdoor`), and circular score badges.
-- [ ] **T-F4.3: Slide-Over Detail Drawer**
+- [x] **T-F4.3: Slide-Over Detail Drawer**
   - Replace cramped modal with an ultra-clean right-side slide-over sheet:
     - Tab 1: Match Score & Gap Breakdown (missing vs matched skill pills).
     - Tab 2: Tailored Resume Markdown & PDF download link.
     - Tab 3: Timeline & Application Metadata.
 
 ### Phase 5: ATS & Tailor Studio (`/studio`)
-- [ ] **T-F5.1: Side-by-Side Comparison Layout**
+- [x] **T-F5.1: Side-by-Side Comparison Layout**
   - Left pane: Master Resume with section breakdown.
   - Right pane: Target Job Description with live keyword scanner.
-- [ ] **T-F5.2: ATS Match Score Gauge**
+- [x] **T-F5.2: ATS Match Score Gauge**
   - Radial SVG gauge displaying overall match, keyword density, and gatekeeper verdict ($\ge 50\%$).
-- [ ] **T-F5.3: Split-Screen Markdown & PDF Previewer**
+- [x] **T-F5.3: Split-Screen Markdown & PDF Previewer**
   - Live split-view comparing original vs tailored STAR bullets with color-coded additions.
 
 ### Phase 6: Application Dispatch Hub (`/dispatch`)
-- [ ] **T-F6.1: Direct Email Composer (Tab 1)**
+- [x] **T-F6.1: Direct Email Composer (Tab 1)**
   - Clean email client UI: recipient field, subject line, rich cover letter editor, and attached PDF chip.
   - 1-Click "Send via Gmail" with loading feedback and status transition to `Applied`.
-- [ ] **T-F6.2: Portal Submission Assistant (Tab 2)**
+- [x] **T-F6.2: Portal Submission Assistant (Tab 2)**
   - Direct portal link button, 1-click candidate detail copy bar, and pre-generated STAR screening Q&A cards with one-click "Copy Answer" buttons.
-- [ ] **T-F6.3: Dispatched History Table (Tab 3)**
+- [x] **T-F6.3: Dispatched History Table (Tab 3)**
   - Transparent audit trail of all applied jobs with verified timestamps.
 
 ### Phase 7: Interview Coordinator & Calendar HITL (`/interviews`)
-- [ ] **T-F7.1: Recruiter Thread Viewer**
+- [x] **T-F7.1: Recruiter Thread Viewer**
   - Email reader displaying recruiter message with highlighted scheduling links (Calendly, Ashby).
-- [ ] **T-F7.2: Visual Calendar Slot Selector**
+- [x] **T-F7.2: Visual Calendar Slot Selector**
   - Interactive calendar slot cards displaying date, time window, and free/busy status.
-- [ ] **T-F7.3: 1-Click Confirmation & Feedback**
+- [x] **T-F7.3: 1-Click Confirmation & Feedback**
   - Confirms Google Calendar event booking and updates Google Sheet row with instant celebratory success state.
 
 ---
