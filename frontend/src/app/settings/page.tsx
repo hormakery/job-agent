@@ -493,7 +493,7 @@ function SettingsContent() {
               type="text"
               value={profile.full_name}
               onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-              placeholder="e.g. Alex Mercer"
+              placeholder="e.g. Blessing Ukwu"
               className="w-full px-3 py-2 rounded-lg bg-slate-950/70 border border-white/[0.08] text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 transition"
             />
           </div>
@@ -507,7 +507,7 @@ function SettingsContent() {
               type="email"
               value={profile.email}
               onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-              placeholder="e.g. alex.mercer.dev@gmail.com"
+              placeholder="e.g. hormakery@gmail.com"
               className="w-full px-3 py-2 rounded-lg bg-slate-950/70 border border-white/[0.08] text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 font-mono transition"
             />
           </div>
@@ -521,7 +521,7 @@ function SettingsContent() {
               type="text"
               value={profile.phone}
               onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              placeholder="e.g. +1 (555) 019-2834"
+              placeholder="e.g. +2348137933827"
               className="w-full px-3 py-2 rounded-lg bg-slate-950/70 border border-white/[0.08] text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 font-mono transition"
             />
           </div>
@@ -535,7 +535,7 @@ function SettingsContent() {
               type="text"
               value={profile.location}
               onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-              placeholder="e.g. San Francisco, CA (PST / Remote)"
+              placeholder="e.g. Remote (Lagos, Nigeria)"
               className="w-full px-3 py-2 rounded-lg bg-slate-950/70 border border-white/[0.08] text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 transition"
             />
           </div>
@@ -549,7 +549,7 @@ function SettingsContent() {
               type="url"
               value={profile.linkedin_url}
               onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })}
-              placeholder="https://linkedin.com/in/alex-mercer"
+              placeholder="https://www.linkedin.com/in/ukwu-blessing/"
               className="w-full px-3 py-2 rounded-lg bg-slate-950/70 border border-white/[0.08] text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 font-mono transition"
             />
           </div>
@@ -563,7 +563,7 @@ function SettingsContent() {
               type="url"
               value={profile.github_url}
               onChange={(e) => setProfile({ ...profile, github_url: e.target.value })}
-              placeholder="https://github.com/alex-mercer"
+              placeholder="https://github.com/hormakery"
               className="w-full px-3 py-2 rounded-lg bg-slate-950/70 border border-white/[0.08] text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 font-mono transition"
             />
           </div>
@@ -577,7 +577,7 @@ function SettingsContent() {
               type="url"
               value={profile.portfolio_url}
               onChange={(e) => setProfile({ ...profile, portfolio_url: e.target.value })}
-              placeholder="https://alexmercer.dev"
+              placeholder="https://blessing-ukwu.netlify.app/"
               className="w-full px-3 py-2 rounded-lg bg-slate-950/70 border border-white/[0.08] text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 font-mono transition"
             />
           </div>

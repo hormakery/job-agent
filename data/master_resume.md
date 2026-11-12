@@ -1,37 +1,69 @@
-# ALEX MERCER
-**Senior Software & Full-Stack Mobile Engineer**  
-San Francisco, CA (Open to Remote) • alex.mercer@example.com • github.com/alexmercer • linkedin.com/in/alexmercer
+# Blessing Ukwu
+
+**Mobile & Software Engineer** · React Native · React · TypeScript · Node.js
+
+📧 hormakery@gmail.com · 📞 +2348137933827 · 🌍 Remote (Lagos, Nigeria)
+🔗 LinkedIn: [ukwu-blessing](https://www.linkedin.com/in/ukwu-blessing/) · GitHub: [hormakery](https://github.com/hormakery) · Portfolio: [blessing-ukwu.netlify.app](https://blessing-ukwu.netlify.app/)
 
 ---
 
-## SUMMARY
-Senior Software Engineer with 6+ years of experience designing, building, and deploying scalable web, mobile, and cloud-native applications. Proven track record in **Python**, **TypeScript**, **React**, **React Native**, **Next.js**, **FastAPI**, **Docker**, **Kubernetes**, and **AWS/GCP**. Adept at building AI-powered workflows, high-throughput APIs, and cross-platform mobile experiences.
+## Summary
 
----
+Mobile and software engineer with 5+ years building scalable, maintainable mobile and web applications using React Native, React, TypeScript, and Node.js. Proven record of shipping secure, high-performance user flows, integrating real-time features, and improving engagement through analytics, live chat, and gamification. Strong collaborator across frontend, backend, and DevOps, with a focus on clean architecture, test coverage, and release reliability.
 
-## CORE TECHNICAL SKILLS
-* **Languages:** Python, TypeScript, JavaScript (ES6+), SQL, Go, Bash
-* **Frontend & Mobile:** React, Next.js, React Native, Expo, Tailwind CSS, Redux, GraphQL
-* **Backend & APIs:** FastAPI, Node.js, Express, PostgreSQL, Redis, REST, gRPC, LangGraph
-* **DevOps & Deployment:** Docker, Kubernetes, GitHub Actions CI/CD, Terraform, AWS (ECS, Lambda, S3), Google Cloud Run
+## Skills
 
----
+- **Mobile:** React Native, Expo, React.js, JavaScript (ES6+), TypeScript
+- **Backend / Web:** Node.js, REST API integration, real-time applications, GraphQL
+- **Auth & Data:** Supabase Auth, session & state management, backend service integration
+- **Quality & Ops:** Crashlytics & analytics, unit/functional testing, code reviews, CI/CD, technical documentation
 
-## PROFESSIONAL EXPERIENCE
+## Experience
 
-### **Senior Software Engineer** — *CloudScale Technologies* (2023 – Present)
-* Architected and deployed a multi-tenant microservices platform using **Python (FastAPI)**, **TypeScript (Next.js)**, and **PostgreSQL**, reducing P95 API latency by **42%** across 1.2M daily requests.
-* Led the mobile engineering initiative using **React Native** and **TypeScript**, increasing crash-free user sessions from **96.4% to 99.8%** and boosting App Store rating to **4.8 stars**.
-* Automated zero-downtime CI/CD deployment pipelines using **Docker**, **GitHub Actions**, and **Kubernetes (EKS)**, cutting release deployment time from 45 minutes to **6 minutes**.
-* Integrated LLM agent workflows using **Google Gemini** and structured output validation, automating 70% of manual document triage operations.
+### Mobile Application Developer — Ronami AI
+*Part-time · Sep 2025 – Present · Valletta, Malta (Remote)*
 
-### **Full-Stack & Mobile Engineer** — *FinPulse Labs* (2020 – 2023)
-* Built real-time financial portfolio dashboards in **React**, **Next.js**, and **Tailwind CSS**, serving **85,000+ active monthly users**.
-* Developed cross-platform iOS and Android features in **React Native**, implementing biometric authentication and offline-first state synchronization.
-* Designed resilient webhook ingestion services in **Node.js** and **Redis**, processing **500K+ daily financial events** with 99.99% reliability.
+- Designed and developed a scalable, maintainable React Native architecture in TypeScript with clean separation of concerns and consistent cross-feature patterns.
+- Built secure, high-performance flows for medical appointment booking and management by integrating frontend logic with backend services and APIs.
+- Implemented robust state and session management that eliminated UI race conditions and session-related bugs across concurrent interactions.
+- Integrated authentication and session handling via Supabase Auth for secure, privacy-first mobile access.
+- Optimized performance and stability by adopting TypeScript across major UI modules, reducing runtime errors and improving maintainability.
+- Partnered with backend and DevOps teams to align data consumption with API contracts, improving reliability and release readiness.
 
----
+### Mobile Engineer — Fanful
+*Contract · Sep 2023 – Jan 2026 · Nyack, NY, USA (Remote)*
 
-## EDUCATION
-**B.S. in Computer Science** — University of California (2016 – 2020)
+- Implemented analytics and Crashlytics to track engagement and strengthen app business logic.
+- Championed the live chat system integration, driving a **23% increase** in user usage and engagement time.
+- Built a gamification feature that scores users by engagement and pairs it with an action-based reward system.
 
+### Mobile Engineer — Sixteen
+*Contract · Sep 2023 – Feb 2024 · India (Remote)*
+
+- Built and maintained new features across the application.
+- Reported project progress and status to team members and management.
+
+### Software Engineer — Evarfinance
+*Full-time · Jun 2022 – Feb 2024 · Lagos State, Nigeria (Remote)*
+
+- Diagnosed and fixed performance bottlenecks to deliver a native-feeling experience.
+- Implemented pixel-perfect UIs that matched design specifications.
+- Created real-time applications that were efficient, highly available, reliable, scalable, maintainable, extensible, and testable.
+- Ensured product quality through code reviews and high unit/functional test coverage.
+- Surfaced potential risks to the development team and proposed resolutions.
+- Wrote technical documentation used by the team throughout implementation.
+
+### Software Engineer — News Central TV
+*Full-time · Nov 2020 – Feb 2023 · Lagos State, Nigeria (Hybrid)*
+
+- Wrote well-designed, testable, efficient code following best software development practices.
+- Integrated data from various back-end services and databases.
+- Clarified requirements with business analysts and product owners in a distributed team environment.
+- Surfaced potential risks to the development team and proposed resolutions.
+- Built new features and provided architectural direction for internal and external Brave web apps, increasing user and customer engagement from **36.8% to 62.7%**.
+
+## Education
+
+**Federal University Otuoke** — B.Sc., Computer Science
+
+**New Horizons Computer Learning Centers** — Information Technology

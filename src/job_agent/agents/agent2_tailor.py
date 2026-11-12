@@ -64,14 +64,15 @@ class Agent2GatekeeperAndTailor:
                 pass
 
         # Deterministic STAR-aligned Markdown tailoring grounded strictly in Master Resume
-        matched_str = ", ".join(evaluation.matched_skills) if evaluation.matched_skills else "Python, TypeScript, React, Cloud Architecture"
+        matched_str = ", ".join(evaluation.matched_skills) if evaluation.matched_skills else "React, React Native, TypeScript, Node.js"
+        candidate_name = settings.candidate_name.upper()
         tailored_header = (
-            f"# ALEX MERCER — Tailored for {job.company_name} ({job.role_title})\n"
+            f"# {candidate_name} — Tailored for {job.company_name} ({job.role_title})\n"
             f"**Target Alignment ({evaluation.match_score}% ATS Match):** {matched_str}\n\n"
             "---\n\n"
             "## TAILORED EXECUTIVE SUMMARY (STAR-ALIGNED)\n"
-            f"Results-driven Senior Engineer tailored for **{job.company_name}**'s **{job.role_title}** role, "
-            f"bringing deep production expertise in **{matched_str}** with proven latency, reliability, and deployment velocity gains.\n\n"
+            f"Results-driven Senior Mobile & Software Engineer tailored for **{job.company_name}**'s **{job.role_title}** role, "
+            f"bringing deep production expertise in **{matched_str}** with proven performance, engagement, and deployment reliability gains.\n\n"
         )
         return tailored_header + master_resume
 

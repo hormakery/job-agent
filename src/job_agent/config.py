@@ -13,13 +13,13 @@ class Settings(BaseSettings):
     )
 
     # 1. Candidate Profile Settings
-    candidate_name: str = "Alex Mercer"
-    candidate_email: str = "alex.mercer@example.com"
-    candidate_phone: str = "+1 (555) 019-2834"
-    candidate_linkedin_url: str = "https://linkedin.com/in/alexmercer"
-    candidate_github_url: str = "https://github.com/alexmercer"
-    candidate_portfolio_url: str = "https://alexmercer.dev"
-    candidate_location: str = "San Francisco, CA (Open to Remote)"
+    candidate_name: str = "Blessing Ukwu"
+    candidate_email: str = "hormakery@gmail.com"
+    candidate_phone: str = "+2348137933827"
+    candidate_linkedin_url: str = "https://www.linkedin.com/in/ukwu-blessing/"
+    candidate_github_url: str = "https://github.com/hormakery"
+    candidate_portfolio_url: str = "https://blessing-ukwu.netlify.app/"
+    candidate_location: str = "Remote (Lagos, Nigeria)"
 
     # 2. Gemini LLM Settings
     gemini_api_key: str = ""

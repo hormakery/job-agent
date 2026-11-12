@@ -39,7 +39,7 @@ def test_all_spec_api_routes():
     # 6. Master Resume GET
     mr = client.get("/api/master-resume")
     assert mr.status_code == 200
-    assert "ALEX MERCER" in mr.json()["content"]
+    assert "Blessing Ukwu" in mr.json()["content"]
 
     # 7. Inbox threads
     inbox = client.get("/api/inbox/threads")

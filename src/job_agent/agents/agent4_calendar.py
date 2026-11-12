@@ -1,3 +1,4 @@
+from job_agent.config import settings
 from job_agent.integrations.calendar_client import GoogleCalendarClient
 from job_agent.integrations.gmail_client import GmailClient
 from job_agent.integrations.sheets_client import GoogleSheetsClient
@@ -30,7 +31,7 @@ class Agent4CalendarCoordinator:
             f"Hi {email_item.company_name} Recruiting Team,\n\n"
             f"Thank you for the invitation to interview for the {email_item.role_title or 'Software Engineer'} role!\n"
             f"I would be happy to meet at {default_slot.label}. Please let me know if that works on your end.\n\n"
-            "Best regards,\nAlex Mercer"
+            f"Best regards,\n{settings.candidate_name}"
         )
         coordination = InterviewCoordinationItem(
             job_id=job_id,
