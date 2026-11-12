@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
 from job_agent.agents.agent2_tailor import Agent2GatekeeperAndTailor
+from job_agent.agents.agent3_dispatch import Agent3Dispatch
 from job_agent.agents.agent4_calendar import Agent4CalendarCoordinator
 from job_agent.config import settings
 from job_agent.integrations.ats_adapter import ATSCheckerAdapter
@@ -23,7 +24,7 @@ from job_agent.integrations.google_auth import (
 from job_agent.integrations.jsearch_client import JSearchProvider
 from job_agent.integrations.pdf_renderer import render_markdown_to_pdf
 from job_agent.integrations.sheets_client import GoogleSheetsClient
-from job_agent.models.schemas import ApplicationStatus, CandidateProfile, ExtractedJobListing
+from job_agent.models.schemas import ApplicationDispatchItem, ApplicationStatus, CandidateProfile, ExtractedJobListing
 from job_agent.workflows.inbox_graph import run_inbox_and_calendar_workflow
 from job_agent.workflows.sourcing_graph import run_sourcing_and_tailoring_workflow
 
@@ -82,6 +83,17 @@ class GoogleCallbackRequest(BaseModel):
 class GoogleClientSecretRequest(BaseModel):
     client_id: str
     client_secret: str
+
+
+class DraftApplicationRequest(BaseModel):
+    custom_subject: Optional[str] = None
+    custom_body: Optional[str] = None
+
+
+class SendApplicationRequest(BaseModel):
+    custom_subject: Optional[str] = None
+    custom_body: Optional[str] = None
+    draft_id: Optional[str] = None
 
 
 @app.get("/api/health")
@@ -256,6 +268,73 @@ def update_job_status(job_id: str, payload: StatusUpdateRequest) -> dict:
 def list_applications() -> list[dict]:
     sheets = GoogleSheetsClient()
     return [a.model_dump() for a in sheets.get_applications()]
+
+
+@app.get("/api/applications/{job_id}")
+def get_application_by_job_id(job_id: str) -> dict:
+    sheets = GoogleSheetsClient()
+    item = sheets.get_application_by_job_id(job_id)
+    if not item:
+        job = sheets.get_job_by_id(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        dispatch_agent = Agent3Dispatch(sheets_client=sheets)
+        item = dispatch_agent.generate_dispatch_item(job)
+    return item.model_dump()
+
+
+@app.post("/api/applications/{job_id}/prepare")
+def prepare_application(job_id: str) -> dict:
+    sheets = GoogleSheetsClient()
+    job = sheets.get_job_by_id(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    dispatch_agent = Agent3Dispatch(sheets_client=sheets)
+    item = dispatch_agent.generate_dispatch_item(job)
+    return item.model_dump()
+
+
+@app.post("/api/applications/prepare-all")
+def prepare_all_applications() -> dict:
+    dispatch_agent = Agent3Dispatch()
+    items = dispatch_agent.prepare_all_pending_dispatches()
+    return {"prepared_count": len(items), "applications": [i.model_dump() for i in items]}
+
+
+@app.post("/api/applications/{job_id}/draft")
+def draft_application(job_id: str, payload: DraftApplicationRequest) -> dict:
+    dispatch_agent = Agent3Dispatch()
+    try:
+        return dispatch_agent.create_gmail_draft_for_job(
+            job_id=job_id,
+            custom_subject=payload.custom_subject,
+            custom_body=payload.custom_body,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/api/applications/{job_id}/send")
+def send_application(job_id: str, payload: SendApplicationRequest) -> dict:
+    dispatch_agent = Agent3Dispatch()
+    try:
+        return dispatch_agent.dispatch_email_application(
+            job_id=job_id,
+            custom_subject=payload.custom_subject,
+            custom_body=payload.custom_body,
+            draft_id=payload.draft_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/api/applications/{job_id}/mark-applied")
+def mark_application_applied(job_id: str) -> dict:
+    dispatch_agent = Agent3Dispatch()
+    try:
+        return dispatch_agent.mark_portal_applied(job_id=job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @app.post("/api/workflows/source")
