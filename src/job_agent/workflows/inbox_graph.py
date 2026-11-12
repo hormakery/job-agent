@@ -15,7 +15,18 @@ def node_poll_and_classify_gmail(state: InboxPipelineState) -> InboxPipelineStat
     logs.append(f"[Agent 3] Classified {len(emails)} recruiter threads.")
     return {
         **state,
-        "active_companies": [j.company_name for j in sheets.get_all_jobs() if j.passed_gate],
+        "active_companies": [
+            j.company_name
+            for j in sheets.get_all_jobs()
+            if j.status
+            in (
+                "Applied",
+                "Under Review",
+                "Assessment Requested",
+                "Interview Requested",
+                "Scheduled",
+            )
+        ],
         "classified_emails": emails,
         "logs": logs,
     }
