@@ -44,16 +44,16 @@ The current UI was built strictly to satisfy functional spec contracts, leaving 
 ## 3. Phased Frontend Implementation Plan
 
 ### Phase 1: Foundation, Typography & Design Tokens
-- [ ] **T-F1.1: Modern Font Setup (`src/app/layout.tsx`)**
-  - Integrate `Inter` or `Geist` font from `next/font/google` for ultra-clean rendering.
-  - Add custom Tailwind utilities for glassmorphism, glow effects, and tabular number formatting.
-- [ ] **T-F1.2: Global Component Primitives**
-  - Create reusable UI primitives in `src/components/ui/`:
-    - `Button.tsx`: Variants (`primary`, `secondary`, `danger`, `ghost`) with loading spinners and hover micro-lifts.
+- [x] **T-F1.1: Modern Font Setup (`src/app/layout.tsx` & `globals.css`)**
+  - Integrated high-performance typography stack with tabular numbers, ambient radial mesh lighting, and glassmorphic surface tokens in `globals.css`.
+  - Zero-network font resilience avoiding sandbox or offline Google Fonts blocking.
+- [x] **T-F1.2: Global Component Primitives**
+  - Created reusable UI primitives in `src/components/ui/`:
+    - `Button.tsx`: Variants (`primary`, `secondary`, `outline`, `ghost`, `danger`, `success`) with micro-lift transitions, active state scaling, and inline loading spinner.
     - `Badge.tsx`: Harmonized status badges with pulsing live indicators.
-    - `Card.tsx`: Standardized glass card container with subtle top highlight border.
+    - `Card.tsx`: Standardized glass card container with subtle top highlight border and backdrop blur.
     - `ScoreRing.tsx`: Circular SVG progress meter for ATS scores (green for $\ge 70$, amber for $50-69$, rose for $<50$).
-    - `Toast.tsx`: Lightweight toast notification provider for copy/save actions.
+    - `Toast.tsx`: Lightweight toast notification provider and `useToast` hook for smooth user feedback.
 
 ### Phase 2: App Shell, Top Bar & Navigation
 - [ ] **T-F2.1: Modern Sidebar (`SidebarNav.tsx`)**
@@ -118,3 +118,4 @@ The current UI was built strictly to satisfy functional spec contracts, leaving 
 2. **Design Cohesion:** Every page adheres to the new glassmorphic design system and typography.
 3. **No Dev Server Collisions:** Clean compilation without missing webpack chunks.
 4. **Accessible Ergonomics:** High contrast readability, clear focus rings, and intuitive action buttons.
+
